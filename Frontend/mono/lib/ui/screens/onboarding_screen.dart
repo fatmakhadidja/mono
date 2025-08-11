@@ -41,13 +41,13 @@ class OnboardingScreen extends StatelessWidget {
             ),
           ),
 
-          SizedBox(height: 20),
+          SizedBox(height: 10),
 
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.8,
             child: MyFilledButton(text: "Get Started"),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
