@@ -8,11 +8,26 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: Center(
-        child: Text(
-          'mono',
-          style: AppTextStyles.heading1(color: AppColors.white),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+
+            colors: [Color(0xff63B5AF), AppColors.primary],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'mono',
+                style: AppTextStyles.heading1(color: AppColors.white),
+              ),
+              
+            ],
+          ),
         ),
       ),
     );
