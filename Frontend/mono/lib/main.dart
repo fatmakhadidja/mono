@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mono/routes/routes.dart';
-import 'package:mono/ui/screens/login_screen.dart';
+
 import 'package:mono/ui/screens/onboarding_screen.dart';
-import 'package:mono/ui/screens/register_screen.dart';
 import 'package:mono/ui/screens/splash_screen.dart';
 
 void main() {
@@ -16,7 +15,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: OnboardingScreen(),
+      home: SplashScreen(),
       onGenerateRoute: AppRoutes.generateRoute,
     );
   }

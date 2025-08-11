@@ -4,7 +4,7 @@ import 'package:mono/core/constants/text_styles.dart';
 
 class EmailTextForm extends StatefulWidget {
   final TextEditingController controller;
-  const EmailTextForm({super.key,required this.controller});
+  const EmailTextForm({super.key, required this.controller});
 
   @override
   State<EmailTextForm> createState() => _EmailTextFormState();
@@ -12,9 +12,27 @@ class EmailTextForm extends StatefulWidget {
 
 class _EmailTextFormState extends State<EmailTextForm> {
   @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.controller,
       decoration: InputDecoration(
+        suffixIcon: widget.controller.text.isNotEmpty
+            ? IconButton(
+                onPressed: () {
+                  widget.controller.clear();
+                  setState(() {}); // Update UI after clearing
+                },
+                icon: Icon(Icons.clear_rounded, color: AppColors.darkGrey),
+              )
+            : null,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         label: Text(
           "Email*",
