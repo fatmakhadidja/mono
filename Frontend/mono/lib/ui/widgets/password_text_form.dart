@@ -3,15 +3,16 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 
 class PasswordTextForm extends StatefulWidget {
+  final TextEditingController controller;
   final String label;
-  const PasswordTextForm({super.key, required this.label});
+  const PasswordTextForm({super.key, required this.label, required this.controller});
 
   @override
   State<PasswordTextForm> createState() => _PasswordTextFormState();
 }
 
 class _PasswordTextFormState extends State<PasswordTextForm> {
-  TextEditingController controller = TextEditingController();
+
   bool visible = false;
   @override
   Widget build(BuildContext context) {

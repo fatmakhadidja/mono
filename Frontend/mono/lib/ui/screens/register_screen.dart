@@ -15,6 +15,10 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController fullNameController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -51,13 +55,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                 child: Column(
                   children: [
-                    FullNameForm(),
+                    FullNameForm(controller: fullNameController),
                     SizedBox(height: 25),
-                    EmailTextForm(),
+                    EmailTextForm(controller: emailController),
                     SizedBox(height: 25),
-                    PasswordTextForm(label: "Password*"),
+                    PasswordTextForm(
+                      label: "Password*",
+                      controller: passwordController,
+                    ),
                     SizedBox(height: 25),
-                    PasswordTextForm(label: "Confirm password*"),
+                    PasswordTextForm(
+                      label: "Confirm password*",
+                      controller: passwordController,
+                    ),
                     SizedBox(height: 30),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,

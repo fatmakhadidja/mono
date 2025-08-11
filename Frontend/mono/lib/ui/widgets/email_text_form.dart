@@ -3,7 +3,8 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 
 class EmailTextForm extends StatefulWidget {
-  const EmailTextForm({super.key});
+  final TextEditingController controller;
+  const EmailTextForm({super.key,required this.controller});
 
   @override
   State<EmailTextForm> createState() => _EmailTextFormState();

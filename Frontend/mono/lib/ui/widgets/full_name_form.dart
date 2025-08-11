@@ -3,7 +3,9 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 
 class FullNameForm extends StatefulWidget {
-  const FullNameForm({super.key});
+  final TextEditingController controller;
+
+  const FullNameForm({super.key, required this.controller});
 
   @override
   State<FullNameForm> createState() => _FullNameFormState();

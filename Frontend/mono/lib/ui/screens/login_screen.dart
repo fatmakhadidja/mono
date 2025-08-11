@@ -15,6 +15,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,9 +52,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
                 child: Column(
                   children: [
-                    EmailTextForm(),
+                    EmailTextForm(controller: emailController),
                     SizedBox(height: 25),
-                    PasswordTextForm(label: "Password*"),
+                    PasswordTextForm(
+                      label: "Password*",
+                      controller: passwordController,
+                    ),
                     SizedBox(height: 30),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.8,
