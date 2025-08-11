@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mono/routes/routes.dart';
+import 'package:mono/ui/screens/login_screen.dart';
 import 'package:mono/ui/screens/onboarding_screen.dart';
+import 'package:mono/ui/screens/register_screen.dart';
 import 'package:mono/ui/screens/splash_screen.dart';
 
 void main() {
@@ -12,6 +15,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(home: OnboardingScreen());
+    return MaterialApp(
+      home: RegisterScreen(),
+      onGenerateRoute: AppRoutes.generateRoute,
+    );
   }
 }
