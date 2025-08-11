@@ -33,11 +33,13 @@ class _EmailTextFormState extends State<EmailTextForm> {
       ),
 
       validator: (value) {
-        if (!value!.contains('@') && value.isNotEmpty) {
-          return "Invalid email format";
-        }
-        if (value.isEmpty) {
+        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,3}$');
+
+        if (value == null || value.isEmpty) {
           return "Email cannot be empty";
+        }
+        if (!emailRegex.hasMatch(value)) {
+          return "Invalid email format";
         }
         return null;
       },
