@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mono/routes/routes.dart';
-
-import 'package:mono/ui/screens/onboarding_screen.dart';
 import 'package:mono/ui/screens/splash_screen.dart';
 
 void main() {
