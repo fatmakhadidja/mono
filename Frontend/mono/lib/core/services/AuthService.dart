@@ -3,13 +3,15 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  String baseUrl = "http://192.168.1.11:8081/api/auth";
+  String baseUrl = "http://10.82.77.43:8081/api/auth";
   String? token;
 
   /// Save token locally in SharedPreferences
-  Future<void> _saveToken(String token) async {
+  Future<void> _saveTokenAndFullname(String token, String fullname) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('jwt_token', token);
+    await prefs.setString('fullname', fullname);
+    print("here is full name -------------- ${prefs.getString('fullname')}");
     this.token = token;
   }
 
@@ -27,43 +29,66 @@ class AuthService {
   }
 
   /// Login and save JWT token
-  Future<bool> authenticate(String email, String password) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/authenticate'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email, 'password': password}),
-    );
+  Future<String?> authenticate(String email, String password) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/authenticate'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      final token = jsonDecode(response.body)['token'];
-      await _saveToken(token);
-      return true;
+      if (response.statusCode == 200) {
+        final token = jsonDecode(response.body)['token'];
+        final data = jsonDecode(response.body)['fullname'];
+        await _saveTokenAndFullname(token, data ?? "");
+        return null;
+      } else if (response.statusCode == 401) {
+        return "Invalid credentials"; // wrong password or user doesn't exist
+      } else {
+        return "Login failed. Server returned ${response.statusCode}";
+      }
+    } catch (e) {
+      return "Login error: $e";
     }
-    return false;
   }
 
   /// Register new user
-  Future<bool> register(String fullname, String password, String email) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'fullName': fullname,
-        'password': password,
-        'email': email,
-      }),
-    );
+  Future<String?> register(
+    String fullname,
+    String password,
+    String email,
+  ) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/register'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'fullName': fullname,
+              'password': password,
+              'email': email,
+            }),
+          )
+          .timeout(Duration(seconds: 5));
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      if (response.body.isNotEmpty) {
-        try {
-          final token = jsonDecode(response.body)['token'];
-          await _saveToken(token);
-        } catch (_) {}
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.body.isNotEmpty) {
+          try {
+            final token = jsonDecode(response.body)['token'];
+            await _saveTokenAndFullname(token, fullname);
+          } catch (_) {}
+        }
+        return null; // success
+      } else if (response.statusCode == 409) {
+        return "Email already exists";
+      } else {
+        return "Registration failed. Server returned ${response.statusCode}";
       }
-      return true;
+    } catch (e) {
+      return "Registration error: $e";
     }
-    return false;
   }
 
   /// Example of calling a protected endpoint
@@ -75,7 +100,7 @@ class AuthService {
       Uri.parse('$baseUrl/protected'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token'
+        'Authorization': 'Bearer $token',
       },
     );
 

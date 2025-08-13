@@ -19,35 +19,34 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthService _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   bool _isLoading = false;
 
-  /// Handle login
   Future<void> _handleLogin() async {
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
-    bool success = await _authService.authenticate(
-      emailController.text.trim(),
-      passwordController.text.trim(),
+    final String? result = await _authService.authenticate(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
     );
 
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
 
-    if (success) {
+    if (result == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Login successful!")));
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Login failed. Please check your credentials."),
+        SnackBar(
+          content: Text(
+            result == "Invalid credentials"
+                ? "Login failed. Please check your credentials."
+                : result,
+          ),
         ),
       );
     }
@@ -55,6 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Stack(
       children: [
         Scaffold(
@@ -65,15 +67,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 Stack(
                   children: [
                     CustomPaint(
-                      size: Size(
-                        MediaQuery.of(context).size.width,
-                        MediaQuery.of(context).size.height * 0.4,
-                      ),
+                      size: Size(screenWidth, screenHeight * 0.4),
                       painter: CustomCurvedShape(),
                     ),
                     Image.asset("assets/images/login_shapes.png"),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
+                    Positioned(
+                      top: 150,
+                      left: 0,
+                      right: 0,
                       child: Image.asset("assets/images/wallet_with_cash.png"),
                     ),
                   ],
@@ -81,18 +82,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 Form(
                   key: _formKey,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Column(
                       children: [
-                        EmailTextForm(controller: emailController),
+                        EmailTextForm(controller: _emailController),
                         const SizedBox(height: 25),
                         PasswordTextForm(
                           label: "Password*",
-                          controller: passwordController,
+                          controller: _passwordController,
                         ),
                         const SizedBox(height: 30),
                         SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.8,
+                          width: screenWidth * 0.8,
                           child: MyFilledButton(
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
@@ -138,19 +139,11 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-        if (_isLoading) // Loader overlay
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              setState(() {
-                _isLoading = false; // Stop loading on tap
-              });
-            },
-            child: Container(
-              color: Colors.black.withOpacity(0.4),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
+        if (_isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.4),
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
           ),
       ],

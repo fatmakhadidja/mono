@@ -20,43 +20,41 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final AuthService _authService = AuthService();
 
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController fullNameController = TextEditingController();
+  final TextEditingController fullNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool _isLoading = false; // Loader state
+  bool _isLoading = false;
 
-  /// Register the user
   Future<void> _handleRegister() async {
-    setState(() {
-      _isLoading = true; // Show loader
-    });
+    if (!_formKey.currentState!.validate()) return;
 
-    bool success = await _authService.register(
+    setState(() => _isLoading = true);
+
+    final String? error = await _authService.register(
       fullNameController.text.trim(),
       passwordController.text.trim(),
       emailController.text.trim(),
     );
 
-    setState(() {
-      _isLoading = false; // Hide loader
-    });
+    print("here is full name in register screen -------------- ${fullNameController.text.trim()}");
+    setState(() => _isLoading = false);
 
-    if (success) {
+    if (error == null) {
+      // Registration successful
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Registration successful!")));
-      Navigator.pushReplacementNamed(
-        context,
-        AppRoutes.home,
-      ); // go to home after register
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registration failed. Please try again.")),
-      );
+      // Show error
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error)));
     }
   }
 
@@ -71,18 +69,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 Stack(
                   children: [
-                    Stack(
-                      children: [
-                        CustomPaint(
-                          size: Size(
-                            MediaQuery.of(context).size.width,
-                            MediaQuery.of(context).size.height * 0.4,
-                          ),
-                          painter: CustomCurvedShape(),
-                        ),
-                        Image.asset("assets/images/login_shapes.png"),
-                      ],
+                    CustomPaint(
+                      size: Size(
+                        MediaQuery.of(context).size.width,
+                        MediaQuery.of(context).size.height * 0.4,
+                      ),
+                      painter: CustomCurvedShape(),
                     ),
+                    Image.asset("assets/images/login_shapes.png"),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
                       child: Image.asset("assets/images/wallet_with_cash.png"),
@@ -92,7 +86,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Form(
                   key: _formKey,
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 10,
+                    ),
                     child: Column(
                       children: [
                         FullNameForm(controller: fullNameController),
@@ -113,11 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           width: MediaQuery.of(context).size.width * 0.8,
                           child: MyFilledButton(
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                _handleRegister(); // Call with ()
-                              }
-                            },
+                            onPressed: _handleRegister,
                             text: "Register",
                           ),
                         ),
@@ -157,19 +150,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
           ),
         ),
-        if (_isLoading) // Loader overlay
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              setState(() {
-                _isLoading = false; // Stop loading on tap
-              });
-            },
-            child: Container(
-              color: Colors.black.withOpacity(0.4),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
+        if (_isLoading)
+          Container(
+            color: Colors.black.withOpacity(0.4),
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
           ),
       ],

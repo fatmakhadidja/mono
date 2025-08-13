@@ -15,6 +15,7 @@ class _FullNameFormState extends State<FullNameForm> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.controller,
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
         label: Text(
