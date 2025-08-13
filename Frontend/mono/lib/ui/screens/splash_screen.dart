@@ -17,11 +17,6 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _checkFirstLaunch();
-
-    // Wait 2 seconds, then go to login page
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
   }
 
   Future<void> _checkFirstLaunch() async {
@@ -30,10 +25,18 @@ class _SplashScreenState extends State<SplashScreen> {
 
     await Future.delayed(const Duration(seconds: 2)); // Splash delay
 
-    if (hasSeenOnboarding) {
-      Navigator.pushReplacementNamed(context, AppRoutes.login);
-    } else if (!hasSeenOnboarding) {
+    if (!hasSeenOnboarding) {
       Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
+      return;
+    }
+
+    // If onboarding has been seen, check if user is already logged in
+    final fullname = prefs.getString('fullname');
+
+    if (fullname != null && fullname.isNotEmpty) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } else {
+      Navigator.pushReplacementNamed(context, AppRoutes.login);
     }
   }
 
@@ -46,25 +49,19 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('mono', style: AppTextStyles.heading1(color: AppColors.white)),
-            SizedBox(height: 15),
-            SizedBox(
+            const SizedBox(height: 15),
+            const SizedBox(
               height: 50,
               width: 50,
               child: LoadingIndicator(
                 indicatorType: Indicator.lineScaleParty,
-
-                colors: const [
+                colors: [
                   AppColors.darkGrey,
                   AppColors.lightGrey,
                   Color(0xff429690),
                 ],
-
-                /// Optional, The color collections
                 strokeWidth: 2,
-
                 pathBackgroundColor: Colors.black,
-
-                /// Optional, the stroke backgroundColor
               ),
             ),
           ],
