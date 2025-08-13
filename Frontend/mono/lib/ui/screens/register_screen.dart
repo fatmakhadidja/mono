@@ -3,7 +3,7 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/core/services/AuthService.dart';
 import 'package:mono/routes/routes.dart';
-import 'package:mono/ui/widgets/custom_curved_shape.dart';
+import 'package:mono/ui/widgets/curved_top.dart';
 import 'package:mono/ui/widgets/email_text_form.dart';
 import 'package:mono/ui/widgets/filled_button.dart';
 import 'package:mono/ui/widgets/full_name_form.dart';
@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       emailController.text.trim(),
     );
 
-
+    if (!_isLoading) return;
     setState(() => _isLoading = false);
 
     if (error == null) {
@@ -69,27 +69,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 Stack(
                   children: [
-                    CustomPaint(
-                      size: Size(
-                        MediaQuery.of(context).size.width,
-                        MediaQuery.of(context).size.height * 0.4,
-                      ),
-                      painter: CustomCurvedShape(),
+                    CurvedTop(
+                      screenHeight: MediaQuery.of(context).size.height,
+                      screenWidth: MediaQuery.of(context).size.width,
                     ),
-                    Image.asset("assets/images/login_shapes.png"),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
+                    Positioned(
+                      top: 150,
+                      left: 0,
+                      right: 0,
                       child: Image.asset("assets/images/wallet_with_cash.png"),
                     ),
                   ],
                 ),
+                SizedBox(height: 25),
                 Form(
                   key: _formKey,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: Column(
                       children: [
                         FullNameForm(controller: fullNameController),
@@ -151,10 +147,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
         if (_isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.4),
-            child: const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isLoading = false;
+              });
+            },
+            child: Container(
+              color: Colors.black.withOpacity(0.4),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
             ),
           ),
       ],

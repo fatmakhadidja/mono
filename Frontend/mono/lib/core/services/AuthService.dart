@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  String baseUrl = "http://10.82.77.43:8081/api/auth";
+  String baseUrl = "http://192.168.1.11:8081/api/auth";
   String? token;
 
   /// Save token locally in SharedPreferences

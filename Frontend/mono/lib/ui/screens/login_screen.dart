@@ -3,7 +3,7 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/core/services/AuthService.dart';
 import 'package:mono/routes/routes.dart';
-import 'package:mono/ui/widgets/custom_curved_shape.dart';
+import 'package:mono/ui/widgets/curved_top.dart';
 import 'package:mono/ui/widgets/email_text_form.dart';
 import 'package:mono/ui/widgets/filled_button.dart';
 import 'package:mono/ui/widgets/password_text_form.dart';
@@ -32,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _passwordController.text.trim(),
     );
 
+    if (!_isLoading) return;
     setState(() => _isLoading = false);
 
     if (result == null) {
@@ -66,11 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 Stack(
                   children: [
-                    CustomPaint(
-                      size: Size(screenWidth, screenHeight * 0.4),
-                      painter: CustomCurvedShape(),
+                    CurvedTop(
+                      screenHeight: MediaQuery.of(context).size.height,
+                      screenWidth: MediaQuery.of(context).size.width,
                     ),
-                    Image.asset("assets/images/login_shapes.png"),
                     Positioned(
                       top: 150,
                       left: 0,
@@ -79,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+
                 SizedBox(height: 25),
                 Form(
                   key: _formKey,
@@ -141,10 +142,18 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         if (_isLoading)
-          Container(
-            color: Colors.black.withOpacity(0.4),
-            child: const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _isLoading = false;
+              });
+              return;
+            },
+            child: Container(
+              color: Colors.black.withOpacity(0.4),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
             ),
           ),
       ],
