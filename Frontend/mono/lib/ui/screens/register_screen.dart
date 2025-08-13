@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       emailController.text.trim(),
     );
 
-    print("here is full name in register screen -------------- ${fullNameController.text.trim()}");
+
     setState(() => _isLoading = false);
 
     if (error == null) {
@@ -88,7 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 15,
-                      vertical: 10,
+                      
                     ),
                     child: Column(
                       children: [

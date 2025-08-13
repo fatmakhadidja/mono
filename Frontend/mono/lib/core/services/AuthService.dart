@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -22,10 +23,11 @@ class AuthService {
   }
 
   /// Remove token (logout)
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
     token = null;
+    Navigator.pushReplacementNamed(context, '/login'); // Go to login
   }
 
   /// Login and save JWT token
@@ -44,10 +46,10 @@ class AuthService {
         final data = jsonDecode(response.body)['fullname'];
         await _saveTokenAndFullname(token, data ?? "");
         return null;
-      } else if (response.statusCode == 401) {
-        return "Invalid credentials"; // wrong password or user doesn't exist
+      } else if (response.statusCode == 403) {
+        return "Invalid credentials"; 
       } else {
-        return "Login failed. Server returned ${response.statusCode}";
+        return "Login failed. Try again";
       }
     } catch (e) {
       return "Login error: $e";
@@ -82,7 +84,7 @@ class AuthService {
         }
         return null; // success
       } else if (response.statusCode == 409) {
-        return "Email already exists";
+        return "The email you entered already exists";
       } else {
         return "Registration failed. Server returned ${response.statusCode}";
       }

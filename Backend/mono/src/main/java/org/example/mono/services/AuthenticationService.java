@@ -27,6 +27,10 @@ public class AuthenticationService {
 
 
     public AuthenticationResponse register(RegisterRequest request) {
+        // Check if email already exists
+        if (userRepo.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
         var user = User.builder().fullName(request.getFullName()).
                 email(request.getEmail()).
                 role(User.Role.USER).

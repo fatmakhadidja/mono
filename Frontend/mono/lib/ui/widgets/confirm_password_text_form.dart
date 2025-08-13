@@ -5,7 +5,7 @@ import 'package:mono/core/constants/text_styles.dart';
 class ConfirmPasswordTextForm extends StatefulWidget {
   final TextEditingController controller;
   final String label;
- final TextEditingController firstPassword;
+  final TextEditingController firstPassword;
   const ConfirmPasswordTextForm({
     super.key,
     required this.label,
@@ -14,7 +14,8 @@ class ConfirmPasswordTextForm extends StatefulWidget {
   });
 
   @override
-  State<ConfirmPasswordTextForm> createState() => _ConfirmPasswordTextFormState();
+  State<ConfirmPasswordTextForm> createState() =>
+      _ConfirmPasswordTextFormState();
 }
 
 class _ConfirmPasswordTextFormState extends State<ConfirmPasswordTextForm> {
@@ -22,6 +23,7 @@ class _ConfirmPasswordTextFormState extends State<ConfirmPasswordTextForm> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.controller,
       obscureText: !visible,
       decoration: InputDecoration(
         suffixIcon: IconButton(
@@ -57,9 +59,12 @@ class _ConfirmPasswordTextFormState extends State<ConfirmPasswordTextForm> {
         if (value!.isEmpty) {
           return "Password cannot be empty";
         }
-        // if (value != widget.firstPassword.text.trim()) {
-        //   return "Please make sure both passwords are the same.";
-        // }
+        if (value != widget.firstPassword.text.trim()) {
+          return "Please make sure both passwords are the same.";
+        }
+        if (value.length < 6) {
+          return "Password must be at least 6 characters long";
+        }
         return null;
       },
     );

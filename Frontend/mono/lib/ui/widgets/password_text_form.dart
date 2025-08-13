@@ -17,6 +17,7 @@ class _PasswordTextFormState extends State<PasswordTextForm> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.controller,
       obscureText: !visible,
       decoration: InputDecoration(
         suffixIcon: IconButton(
@@ -51,6 +52,9 @@ class _PasswordTextFormState extends State<PasswordTextForm> {
       validator: (value) {
         if (value!.isEmpty) {
           return "Password cannot be empty";
+        }
+        if (value.length < 6) {
+          return "Password must be at least 6 characters long";
         }
         return null;
       },
