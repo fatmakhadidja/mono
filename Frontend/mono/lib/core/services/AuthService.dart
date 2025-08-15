@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  String baseUrl = "http://192.168.1.11:8081/api/auth";
+  String baseUrl = "http://192.168.1.9:8081/api/auth";
   String? token;
 
   /// Save token locally in SharedPreferences
@@ -12,7 +12,6 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('jwt_token', token);
     await prefs.setString('fullname', fullname);
-    print("here is full name -------------- ${prefs.getString('fullname')}");
     this.token = token;
   }
 
@@ -47,7 +46,7 @@ class AuthService {
         await _saveTokenAndFullname(token, data ?? "");
         return null;
       } else if (response.statusCode == 403) {
-        return "Invalid credentials"; 
+        return "Invalid credentials";
       } else {
         return "Login failed. Try again";
       }

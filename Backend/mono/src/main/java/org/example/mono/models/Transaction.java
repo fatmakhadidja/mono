@@ -1,9 +1,12 @@
 package org.example.mono.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -14,12 +17,14 @@ public class Transaction {
     @GeneratedValue
     private Integer id;
     private double amount;
+    private String title;
     private boolean income;
+    private LocalDate date;
 
-    private int userid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "wallet_id")
+    @JsonBackReference
     private Wallet wallet;
 
 }

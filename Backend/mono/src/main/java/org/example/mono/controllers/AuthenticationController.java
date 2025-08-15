@@ -8,10 +8,18 @@ import lombok.RequiredArgsConstructor;
 import org.example.mono.auth.AuthenticationRequest;
 import org.example.mono.auth.AuthenticationResponse;
 import org.example.mono.auth.RegisterRequest;
+
+import org.example.mono.models.Wallet;
+import org.example.mono.repositories.UserRepo;
+import org.example.mono.repositories.WalletRepo;
 import org.example.mono.services.AuthenticationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
+
 
 
 @RestController
@@ -20,13 +28,26 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class AuthenticationController {
 
+
+    @Autowired
+    private final WalletRepo walletRepo;
+
     private final AuthenticationService service;
+    @Autowired
+    private UserRepo userRepo;
 
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
-            return ResponseEntity.ok(service.register(request));
+            var result = service.register(request);
+
+            Wallet wallet = new Wallet();
+            wallet.setBalance(0);
+            wallet.setUserId(result.getId());
+           walletRepo.save(wallet);
+
+            return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             if ("Email already exists".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());

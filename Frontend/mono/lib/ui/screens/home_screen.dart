@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/core/services/AuthService.dart';
+import 'package:mono/core/services/WalletService.dart';
 import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
 import 'package:mono/ui/widgets/curved_top.dart';
@@ -9,6 +10,7 @@ import 'package:mono/ui/widgets/transaction_row.dart';
 import 'package:mono/ui/widgets/wallet_container.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,51 +30,37 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  late Wallet myWallet;
+  late Wallet myWallet = Wallet(
+    balance: 1.0,
+    incomeAmount: 11.0,
+    expenseAmount: 11.0,
+    transactions: [],
+  );
+  final WalletService walletService = WalletService();
 
-  List<Transaction> transactions = [
-    Transaction(title: "upwork", amount: 2500, income: true, date: "yesterday"),
-    Transaction(title: "upwork", amount: 2500, income: true, date: "yesterday"),
-    Transaction(title: "upwork", amount: 3000, income: true, date: "last week"),
-    Transaction(
-      title: "upwork",
-      amount: 2000,
-      income: false,
-      date: "last month",
-    ),
-    Transaction(
-      title: "upwork",
-      amount: 2000,
-      income: false,
-      date: "last month",
-    ),
-    Transaction(
-      title: "upwork",
-      amount: 2000,
-      income: false,
-      date: "last month",
-    ),
-    Transaction(
-      title: "upwork",
-      amount: 2000,
-      income: false,
-      date: "last month",
-    ),
-  ];
+  List<Transaction> transactions = [];
 
   int navIndex = 0;
+  String formattedDate = '';
 
   @override
   void initState() {
     super.initState();
     _loadFullname();
 
-    myWallet = Wallet(
-      balance: 200000,
-      transactions: transactions,
-      incomeAmount: 2000,
-      expenseAmount: 500,
-    );
+    walletService.getWalletInfo().then((wallet) {
+      print("Fetched wallet: $wallet");
+
+      if (wallet != null) {
+        setState(() {
+          myWallet = wallet;
+
+          transactions = wallet.transactions;
+
+          print("Fetched transactions: ${wallet.transactions}");
+        });
+      }
+    });
   }
 
   @override
@@ -160,86 +148,136 @@ class _HomeScreenState extends State<HomeScreen> {
                     fontSize: 18,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {},
-                  child: Text(
-                    "View All",
-                    style: AppTextStyles.body1(
-                      color: AppColors.darkGrey,
-                      fontSize: 14,
-                    ),
+                IconButton(
+                  onPressed: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.light(
+                              primary:
+                                  AppColors.primary, // header background color
+                            ),
+                            textButtonTheme: TextButtonThemeData(
+                              style: TextButton.styleFrom(
+                                foregroundColor:
+                                    Colors.teal, // button text color
+                              ),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+
+                    if (pickedDate != null) {
+                      setState(() {
+                        formattedDate = DateFormat(
+                          'yyyy-MM-dd',
+                        ).format(pickedDate);
+                        transactions = myWallet.transactions.where((tx) {
+                          return tx.date == formattedDate;
+                        }).toList();
+                      });
+                    }
+                  },
+                  icon: Icon(
+                    Icons.calendar_today_rounded,
+                    color: AppColors.darkGrey,
                   ),
                 ),
               ],
             ),
           ),
 
-          ...transactions
-              .map(
-                (tx) => TransactionRow(
-                  title: tx.title,
-                  date: tx.date,
-                  amount: tx.amount,
-                ),
-              )
-              .toList(),
+          ...(transactions.isEmpty
+              ? [
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(
+                      child: Text(
+                        "No transactions yet",
+                        style: AppTextStyles.body1(
+                          color: AppColors.darkGrey,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]
+              : transactions
+                    .map(
+                      (tx) => TransactionRow(
+                        title: tx.title,
+                        date: tx.date,
+                        amount: tx.amount,
+                        income: tx.income,
+                      ),
+                    )
+                    .toList()),
         ],
       ),
-      bottomNavigationBar:  Container(
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: Offset(0, 2),
-              )
-            ]
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        onTap: (index) {
+          setState(() {
+            navIndex = index;
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
+              "assets/icons/home.svg",
+              width: 24,
+              height: 24,
+              color: navIndex == 0 ? AppColors.primary : AppColors.darkGrey,
+            ),
+            label: "",
           ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            items: [
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  "assets/icons/home.svg",
-                  width: 24,
-                  height: 24,
-                  color: navIndex == 0 ? AppColors.primary : AppColors.darkGrey,
-                ),
-                label: "",
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  "assets/icons/stat.svg",
-                  width: 24,
-                  height: 24,
-                  color: navIndex == 1 ? AppColors.primary : AppColors.darkGrey,
-                ),
-                label: "",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.add,
-                  size: 30,
-                  color: navIndex == 2 ? AppColors.primary : AppColors.darkGrey,
-                ),
-                label: "",
-              ),
-              BottomNavigationBarItem(
-                icon: SvgPicture.asset(
-                  "assets/icons/user.svg",
-                  width: 24,
-                  height: 24,
-                  color: navIndex == 2 ? AppColors.primary : AppColors.darkGrey,
-                ),
-                label: "",
-              ),
-            ],
-            currentIndex: navIndex,
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
+              "assets/icons/stat.svg",
+              width: 24,
+              height: 24,
+              color: navIndex == 1 ? AppColors.primary : AppColors.darkGrey,
+            ),
+            label: "",
           ),
-        ),
-      
+          BottomNavigationBarItem(
+            icon: SvgPicture.asset(
+              "assets/icons/wallet.svg",
+              width: 24,
+              height: 24,
+              color: navIndex == 2 ? AppColors.primary : AppColors.darkGrey,
+            ),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              decoration: BoxDecoration(
+                color: navIndex == 3
+                    ? AppColors.primary.withOpacity(0.1)
+                    : Colors.transparent,
+                shape: BoxShape.circle,
+              ),
+              child: SvgPicture.asset(
+                "assets/icons/user.svg",
+                width: 24,
+                height: 24,
+                color: navIndex == 3 ? AppColors.primary : AppColors.darkGrey,
+              ),
+            ),
+            label: "",
+          ),
+        ],
+        currentIndex: navIndex,
+      ),
     );
   }
 }

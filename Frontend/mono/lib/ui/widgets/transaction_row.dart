@@ -8,7 +8,8 @@ class TransactionRow extends StatefulWidget {
   final String? title;
   final String? date;
   final double? amount;
-  const TransactionRow({super.key, required this.title, required this.date, required this.amount});
+  final bool income;
+  const TransactionRow({super.key, required this.title, required this.date, required this.amount, required this.income});
 
   @override
   State<TransactionRow> createState() => _TransactionRowState();
@@ -41,8 +42,9 @@ class _TransactionRowState extends State<TransactionRow> {
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 18),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.title ?? "",
@@ -64,9 +66,11 @@ class _TransactionRowState extends State<TransactionRow> {
             ],
           ),
           Text(
-            '+ ${widget.amount} DZD',
+            widget.income ? 
+            '+ ${widget.amount} DZD' :
+            '- ${widget.amount} DZD',
             style: AppTextStyles.heading1(
-              color: AppColors.success,
+              color: widget.income ? AppColors.success : AppColors.error,
               fontSize: 18,
             ),
           ),

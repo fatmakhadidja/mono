@@ -1,10 +1,9 @@
 package org.example.mono.models;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,13 +17,15 @@ import java.util.List;
 public class Wallet {
     @Id
     @GeneratedValue
-    private String id;
+    private Integer id;
+
 
     private double balance;
 
 
     private int userId;
 
-    @OneToMany(mappedBy = "wallet" )
+    @OneToMany(mappedBy = "wallet", fetch = FetchType.EAGER)
+    @JsonManagedReference
     List<Transaction> transactions;
 }

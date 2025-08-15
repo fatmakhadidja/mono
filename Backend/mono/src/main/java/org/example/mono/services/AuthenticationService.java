@@ -39,8 +39,14 @@ public class AuthenticationService {
         userRepo.save(user);
 
         var jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).fullname(user.getFullName()).build();
-    }
+        return AuthenticationResponse.builder()
+                .id(user.getId())
+                .token(jwtToken)
+                .fullname(user.getFullName())
+                .build();    }
+
+
+
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
@@ -58,6 +64,7 @@ public class AuthenticationService {
 //        saveUserToken(user, jwtToken);
 
         return AuthenticationResponse.builder()
+                .id(user.getId())
                 .token(jwtToken)
                 .fullname(user.getFullName())
                 .build();
