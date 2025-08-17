@@ -6,7 +6,12 @@ import 'package:intl/intl.dart';
 import 'package:mono/ui/widgets/transaction_type_text_form.dart';
 
 class TransactionContainer extends StatefulWidget {
-  const TransactionContainer({super.key});
+   final TextEditingController transactionNameController ;
+   final TextEditingController transactionAmountController ;
+   final TextEditingController transactionDateController;
+   final TextEditingController transactionTypeController ;
+
+  const TransactionContainer({super.key, required this.transactionNameController, required this.transactionAmountController, required this.transactionDateController, required this.transactionTypeController   });
 
   @override
   State<TransactionContainer> createState() => _TransactionContainerState();

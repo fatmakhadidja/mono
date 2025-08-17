@@ -16,8 +16,9 @@ public class Transaction {
     @Id
     @GeneratedValue
     private Integer id;
+
     private double amount;
-    private String title;
+    private String name;
     private boolean income;
     private LocalDate date;
 

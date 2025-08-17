@@ -1,5 +1,6 @@
 package org.example.mono.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,6 +28,10 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonBackReference
+    private Wallet wallet;
 
     @Enumerated(EnumType.STRING)
     private Role role;

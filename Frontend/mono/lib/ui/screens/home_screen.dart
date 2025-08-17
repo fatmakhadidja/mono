@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Center(child: Text("Profile Page")),
     ];
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       body: pages[navIndex],
       bottomNavigationBar: BottomNavigationBar(

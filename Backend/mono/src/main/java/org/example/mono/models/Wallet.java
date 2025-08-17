@@ -23,7 +23,10 @@ public class Wallet {
     private double balance;
 
 
-    private int userId;
+    @OneToOne
+    @JsonManagedReference
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference

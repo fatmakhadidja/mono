@@ -44,7 +44,10 @@ public class AuthenticationController {
 
             Wallet wallet = new Wallet();
             wallet.setBalance(0);
-            wallet.setUserId(result.getId());
+            wallet.setUser(
+                    userRepo.findById(result.getId())
+                            .orElseThrow(() -> new RuntimeException("User not found"))
+            );
            walletRepo.save(wallet);
 
             return ResponseEntity.ok(result);

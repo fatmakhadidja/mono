@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mono/routes/routes.dart';
 import 'package:mono/ui/screens/splash_screen.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   runApp(const MyApp());
 }
 
