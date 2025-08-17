@@ -8,11 +8,11 @@ class AuthService {
   String? token;
 
   /// Save token locally in SharedPreferences
-  Future<void> _saveTokenAndFullname(String token, String fullName  ) async {
+  Future<void> _saveTokenAndFullname(String token, String fullName) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('jwt_token', token);
     await prefs.setString('fullName', fullName);
-    
+
     this.token = token;
   }
 
@@ -27,6 +27,7 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
     await prefs.remove('fullName');
+    await prefs.remove('balance');
     token = null;
     Navigator.pushReplacementNamed(context, '/login'); // Go to login
   }
@@ -45,7 +46,7 @@ class AuthService {
       if (response.statusCode == 200) {
         final token = jsonDecode(response.body)['token'];
         final data = jsonDecode(response.body)['fullName'];
-        print("================== here is fullName $data");
+        
         await _saveTokenAndFullname(token, data ?? "");
         return null;
       } else if (response.statusCode == 403) {

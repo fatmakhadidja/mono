@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mono/core/constants/text_styles.dart';
+import 'package:mono/core/services/WalletService.dart';
+import 'package:mono/models/transaction.dart';
 import 'package:mono/routes/routes.dart';
 import 'package:mono/ui/widgets/curved_top.dart';
 import 'package:mono/ui/widgets/filled_button.dart';
@@ -14,14 +16,18 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   TextEditingController transactionNameController = TextEditingController();
   TextEditingController transactionAmountController = TextEditingController();
   TextEditingController transactionDateController = TextEditingController(
-    text: DateFormat('dd MMM yyyy').format(DateTime.now()),
+    text: DateFormat('yyyy-MM-dd').format(DateTime.now()),
   );
   TextEditingController transactionTypeController = TextEditingController(
     text: "Income",
   );
+
+  WalletService walletService = WalletService();
 
   @override
   Widget build(BuildContext context) {
@@ -60,13 +66,11 @@ class _WalletPageState extends State<WalletPage> {
                   ],
                 ),
 
-                // 👇 acts like top spacing
                 const Spacer(),
 
                 Expanded(
                   flex: 8,
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 80),
                     child: Column(
                       children: [
                         TransactionContainer(
@@ -75,11 +79,52 @@ class _WalletPageState extends State<WalletPage> {
                               transactionAmountController,
                           transactionDateController: transactionDateController,
                           transactionTypeController: transactionTypeController,
+                          formKey: formKey,
                         ),
-                       SizedBox(height: 50),
+                        SizedBox(height: 50),
                         MyFilledButton(
                           text: "Add New Transaction",
-                          onPressed: () {},
+                          onPressed: () async {
+                            if (formKey.currentState!.validate()) {
+                              final amountText = transactionAmountController
+                                  .text
+                                  .trim();
+                              final amount = double.tryParse(amountText);
+                              Transaction transaction = new Transaction(
+                                amount: amount ?? 0.0,
+                                name: transactionNameController.text,
+                                income:
+                                    transactionTypeController.text == "Income",
+                                date: DateFormat('yyyy-MM-dd').format(
+                                  DateTime.parse(
+                                    transactionDateController.text,
+                                  ),
+                                ),
+                              );
+                              final result = await walletService.addTransaction(
+                                transaction,
+                              );
+                              if (result) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "Transaction added successfully",
+                                    ),
+                                  ),
+                                );
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  AppRoutes.home,
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Failed to add transaction"),
+                                  ),
+                                );
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),
@@ -87,7 +132,6 @@ class _WalletPageState extends State<WalletPage> {
                 ),
 
                 const Spacer(),
-                
               ],
             ),
           ),

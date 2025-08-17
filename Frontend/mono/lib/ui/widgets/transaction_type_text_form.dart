@@ -3,6 +3,7 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 
 class TransactionTypeTextForm extends StatefulWidget {
+  
   final TextEditingController controller;
   const TransactionTypeTextForm({super.key, required this.controller});
 
@@ -59,9 +60,11 @@ class _TransactionTypeTextFormState extends State<TransactionTypeTextForm> {
           ),
         ),
         validator: (value) {
+       
           if (value == null || value.isEmpty) {
             return "Please select a transaction type";
           }
+          
           return null;
         },
       );

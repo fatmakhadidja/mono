@@ -4,6 +4,8 @@ import 'package:mono/core/constants/text_styles.dart';
 
 class TransactionNameTextForm extends StatefulWidget {
   final TextEditingController controller;
+
+
   const TransactionNameTextForm({super.key, required this.controller});
 
   @override
@@ -23,6 +25,7 @@ class _TransactionNameTextFormState extends State<TransactionNameTextForm> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      
         controller: widget.controller,
         decoration: InputDecoration(
           suffixIcon: widget.controller.text.isNotEmpty

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
-import 'package:mono/main.dart';
 
 class TransactionRow extends StatefulWidget {
   

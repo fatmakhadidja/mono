@@ -59,7 +59,14 @@ public class WalletController {
             Wallet wallet;
                 wallet = ((User) principal).getWallet();
             transaction.setWallet(wallet);
+            if(transaction.isIncome()){
+                wallet.setBalance(wallet.getBalance()+transaction.getAmount());
+            } else {
+                wallet.setBalance(wallet.getBalance()-transaction.getAmount());
+            }
+            walletRepo.save(wallet);
             transactionRepo.save(transaction);
+
             return ResponseEntity.ok(transaction);
 
         } catch (Exception e) {

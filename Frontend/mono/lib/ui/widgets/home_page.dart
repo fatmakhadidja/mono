@@ -8,11 +8,13 @@ import 'package:mono/ui/widgets/transaction_row.dart';
 import 'package:mono/ui/widgets/wallet_container.dart';
 import 'package:intl/intl.dart';
 import 'package:mono/core/services/AuthService.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   final String fullname;
   List<Transaction> transactions;
   final Wallet wallet;
+
 
   HomePage({
     super.key,
@@ -21,6 +23,8 @@ class HomePage extends StatefulWidget {
     required this.wallet,
   });
 
+  
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
@@ -28,6 +32,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final AuthService authService = AuthService();
   String? formattedDate;
+  double balance = 0.0;
+
+    @override
+  void initState() {
+    super.initState();
+    _loadBalance(); // load prefs asynchronously
+  }
+
+  Future<void> _loadBalance() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+       balance = prefs.getDouble("balance") ?? 0.0;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +110,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
                 child: WalletContainer(
-                  balance: widget.wallet.balance,
+                  balance: balance,
                   incomeAmount: widget.wallet.incomeAmount,
                   expenseAmount: widget.wallet.expenseAmount,
                 ),
@@ -186,7 +204,7 @@ class _HomePageState extends State<HomePage> {
             : widget.transactions
                   .map(
                     (tx) => TransactionRow(
-                      title: tx.title,
+                      title: tx.name,
                       date: tx.date,
                       amount: tx.amount,
                       income: tx.income,
