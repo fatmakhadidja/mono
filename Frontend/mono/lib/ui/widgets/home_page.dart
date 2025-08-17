@@ -29,7 +29,6 @@ class _HomePageState extends State<HomePage> {
   final AuthService authService = AuthService();
   String? formattedDate;
 
-
   @override
   Widget build(BuildContext context) {
     return ListView(
@@ -122,6 +121,25 @@ class _HomePageState extends State<HomePage> {
                     initialDate: DateTime.now(),
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: ColorScheme.light(
+                            primary: AppColors
+                                .primary, // header background + selected date
+                            onPrimary: Colors.white, // text color on header
+                            onSurface: AppColors.darkGrey, // default text color
+                          ),
+                          textButtonTheme: TextButtonThemeData(
+                            style: TextButton.styleFrom(
+                              foregroundColor:
+                                  AppColors.primary, // buttons like CANCEL / OK
+                            ),
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
                   );
 
                   if (pickedDate != null) {
@@ -130,11 +148,11 @@ class _HomePageState extends State<HomePage> {
                         'yyyy-MM-dd',
                       ).format(pickedDate);
 
-                      widget.transactions = widget.wallet.transactions.where((tx) {
-                        
+                      widget.transactions = widget.wallet.transactions.where((
+                        tx,
+                      ) {
                         DateTime txDate = DateTime.parse(tx.date);
 
-                       
                         return DateFormat('yyyy-MM-dd').format(txDate) ==
                             formattedDate;
                       }).toList();
