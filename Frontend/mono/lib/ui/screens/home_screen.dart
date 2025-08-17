@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mono/core/constants/colors.dart';
-import 'package:mono/core/constants/text_styles.dart';
-import 'package:mono/core/services/AuthService.dart';
 import 'package:mono/core/services/WalletService.dart';
 import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
-import 'package:mono/ui/widgets/curved_top.dart';
-import 'package:mono/ui/widgets/transaction_row.dart';
-import 'package:mono/ui/widgets/wallet_container.dart';
+import 'package:mono/ui/widgets/home_page.dart';
+import 'package:mono/ui/widgets/wallet_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,13 +17,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? fullname;
-  final AuthService authService = AuthService();
   final WalletService walletService = WalletService();
 
   late Wallet myWallet = Wallet(
-    balance: 1.0,
-    incomeAmount: 11.0,
-    expenseAmount: 11.0,
+    balance: 0.0,
+    incomeAmount: 0.0,
+    expenseAmount: 0.0,
     transactions: [],
   );
 
@@ -35,17 +30,18 @@ class _HomeScreenState extends State<HomeScreen> {
   int navIndex = 0;
   String formattedDate = '';
 
-  Future<void> _loadFullname() async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> loadFullname() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      fullname = prefs.getString('fullname');
+      fullname = prefs.getString('fullName');
+      print("here is fullname in home $fullname");
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _loadFullname();
+    loadFullname();
 
     walletService.getWalletInfo().then((wallet) {
       if (wallet != null) {
@@ -57,18 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // List of screens for bottom navigation
-  late final List<Widget> _pages = [
-    _buildHomePage(),
-    Center(child: Text("Statistics Page")),
-    Center(child: Text("Wallet Page")),
-    Center(child: Text("Profile Page")),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final pages = [
+      HomePage(
+        fullname: fullname ?? '',
+        transactions: transactions,
+        wallet: myWallet,
+      ),
+     Center(child: Text("Statistics Page")),
+      WalletPage(),
+      Center(child: Text("Profile Page")),
+    ];
     return Scaffold(
-      body: _pages[navIndex],
+      body: pages[navIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: false,
@@ -126,146 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         currentIndex: navIndex,
       ),
-    );
-  }
-
-  /// Build your original home page UI
-  Widget _buildHomePage() {
-    return ListView(
-      padding: EdgeInsets.zero,
-      children: [
-        Stack(
-          children: [
-            Stack(
-              children: [
-                CurvedTop(
-                  screenHeight: MediaQuery.of(context).size.height,
-                  screenWidth: MediaQuery.of(context).size.width,
-                ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(25.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Welcome back,",
-                              style: AppTextStyles.body1(
-                                color: Colors.white,
-                                fontSize: 14,
-                              ),
-                            ),
-                            Text(
-                              "$fullname",
-                              style: AppTextStyles.heading1(
-                                color: Colors.white,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.06),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: IconButton(
-                            onPressed: () {
-                              authService.logout(context);
-                            },
-                            icon: const Icon(
-                              Icons.logout_rounded,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
-                child: WalletContainer(
-                  balance: myWallet.balance,
-                  incomeAmount: myWallet.incomeAmount,
-                  expenseAmount: myWallet.expenseAmount,
-                ),
-              ),
-            ),
-          ],
-        ),
-
-        Padding(
-          padding: const EdgeInsets.fromLTRB(15, 5, 15, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Transaction History",
-                style: AppTextStyles.heading1(
-                  color: Colors.black,
-                  fontSize: 18,
-                ),
-              ),
-              IconButton(
-                onPressed: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-
-                  if (pickedDate != null) {
-                    setState(() {
-                      formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
-                      transactions = myWallet.transactions.where((tx) {
-                        return tx.date == formattedDate;
-                      }).toList();
-                    });
-                  }
-                },
-                icon: Icon(
-                  Icons.calendar_today_rounded,
-                  color: AppColors.darkGrey,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        ...(transactions.isEmpty
-            ? [
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Center(
-                    child: Text(
-                      "No transactions yet",
-                      style: AppTextStyles.body1(
-                        color: AppColors.darkGrey,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ]
-            : transactions
-                .map(
-                  (tx) => TransactionRow(
-                    title: tx.title,
-                    date: tx.date,
-                    amount: tx.amount,
-                    income: tx.income,
-                  ),
-                )
-                .toList()),
-      ],
     );
   }
 }

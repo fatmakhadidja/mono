@@ -25,7 +25,7 @@ public class Wallet {
 
     private int userId;
 
-    @OneToMany(mappedBy = "wallet", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference
     List<Transaction> transactions;
 }

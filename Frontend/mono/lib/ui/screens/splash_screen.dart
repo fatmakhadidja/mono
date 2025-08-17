@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     // If onboarding has been seen, check if user is already logged in
-    final fullname = prefs.getString('fullname');
+    final fullname = prefs.getString('fullName');
 
     if (fullname != null && fullname.isNotEmpty) {
       Navigator.pushReplacementNamed(context, AppRoutes.home);

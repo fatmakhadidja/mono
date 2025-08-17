@@ -42,7 +42,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .id(user.getId())
                 .token(jwtToken)
-                .fullname(user.getFullName())
+                .fullName(user.getFullName())
                 .build();    }
 
 
@@ -66,7 +66,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .id(user.getId())
                 .token(jwtToken)
-                .fullname(user.getFullName())
+                .fullName(user.getFullName())
                 .build();
     }
 }

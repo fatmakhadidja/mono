@@ -37,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final String? error = await _authService.register(
       fullNameController.text.trim(),
+      
       passwordController.text.trim(),
       emailController.text.trim(),
     );

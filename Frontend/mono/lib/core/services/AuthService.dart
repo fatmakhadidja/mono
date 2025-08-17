@@ -8,14 +8,15 @@ class AuthService {
   String? token;
 
   /// Save token locally in SharedPreferences
-  Future<void> _saveTokenAndFullname(String token, String fullname) async {
-    final prefs = await SharedPreferences.getInstance();
+  Future<void> _saveTokenAndFullname(String token, String fullName  ) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('jwt_token', token);
-    await prefs.setString('fullname', fullname);
+    await prefs.setString('fullName', fullName);
+    
     this.token = token;
   }
 
-  /// Load token from SharedPreferences (e.g., on app start)
+  /// Load token from SharedPreferences
   Future<void> loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     token = prefs.getString('jwt_token');
@@ -25,6 +26,7 @@ class AuthService {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
+    await prefs.remove('fullName');
     token = null;
     Navigator.pushReplacementNamed(context, '/login'); // Go to login
   }
@@ -42,7 +44,8 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final token = jsonDecode(response.body)['token'];
-        final data = jsonDecode(response.body)['fullname'];
+        final data = jsonDecode(response.body)['fullName'];
+        print("================== here is fullName $data");
         await _saveTokenAndFullname(token, data ?? "");
         return null;
       } else if (response.statusCode == 403) {
@@ -81,7 +84,7 @@ class AuthService {
             await _saveTokenAndFullname(token, fullname);
           } catch (_) {}
         }
-        return null; // success
+        return null;
       } else if (response.statusCode == 409) {
         return "The email you entered already exists";
       } else {
