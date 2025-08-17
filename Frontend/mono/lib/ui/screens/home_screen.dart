@@ -50,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           myWallet = wallet;
           transactions = wallet.transactions;
+          
         });
       }
     });
@@ -70,8 +71,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
+      
       body: pages[navIndex],
       bottomNavigationBar: BottomNavigationBar(
+        elevation: 20,
+        backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: false,
         showUnselectedLabels: false,

@@ -91,6 +91,7 @@ class _WalletPageState extends State<WalletPage> {
                                   .trim();
                               final amount = double.tryParse(amountText);
                               Transaction transaction = new Transaction(
+                                id: 0, // ignored in the backend
                                 amount: amount ?? 0.0,
                                 name: transactionNameController.text,
                                 income:

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/models/transaction.dart';
@@ -15,15 +16,12 @@ class HomePage extends StatefulWidget {
   List<Transaction> transactions;
   final Wallet wallet;
 
-
   HomePage({
     super.key,
     required this.fullname,
     required this.transactions,
     required this.wallet,
   });
-
-  
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -34,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   String? formattedDate;
   double balance = 0.0;
 
-    @override
+  @override
   void initState() {
     super.initState();
     _loadBalance(); // load prefs asynchronously
@@ -43,7 +41,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _loadBalance() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-       balance = prefs.getDouble("balance") ?? 0.0;
+      balance = prefs.getDouble("balance") ?? 0.0;
     });
   }
 
@@ -204,6 +202,14 @@ class _HomePageState extends State<HomePage> {
             : widget.transactions
                   .map(
                     (tx) => TransactionRow(
+                      onDeleted: () {
+                        setState(() {
+                          widget.transactions.removeWhere((t) => t.id == tx.id);
+                          _loadBalance();
+                        });
+                      },
+                      transaction: tx,
+                      id: tx.id,
                       title: tx.name,
                       date: tx.date,
                       amount: tx.amount,

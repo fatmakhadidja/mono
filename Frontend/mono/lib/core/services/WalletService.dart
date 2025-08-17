@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
 
 class WalletService {
-   String baseUrl = "http://192.168.1.9:8081/api/wallet";
+  String baseUrl = "http://192.168.1.9:8081/api/wallet";
   Future<Wallet?> getWalletInfo() async {
-   
     try {
       // Retrieve the stored token
       final prefs = await SharedPreferences.getInstance();
@@ -33,6 +33,7 @@ class WalletService {
         List<Transaction> transactions = (data['transactions'] as List)
             .map(
               (t) => Transaction(
+                id : t['id'],
                 amount: t['amount'],
                 name: t['name'] ?? "",
                 income: t['income'],
@@ -45,9 +46,13 @@ class WalletService {
         double incomeAmount = 0.0;
         double expenseAmount = 0.0;
         for (var tx in transactions) {
-          if (tx.income) {
+          if (tx.income &&
+              tx.date ==
+                  DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()) {
             incomeAmount += tx.amount;
-          } else {
+          } else if (!tx.income &&
+              tx.date ==
+                  DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()) {
             expenseAmount += tx.amount;
           }
         }
@@ -88,12 +93,11 @@ class WalletService {
       );
 
       if (response.statusCode == 200) {
-      if (transaction.income) {
-          
-          double currentBalance = prefs.getDouble("balance") ?? 0.0;
+         double currentBalance = prefs.getDouble("balance") ?? 0.0;
+        if (transaction.income) {
+         
           prefs.setDouble("balance", currentBalance + transaction.amount);
         } else {
-          double currentBalance = prefs.getDouble("balance") ?? 0.0;
           prefs.setDouble("balance", currentBalance - transaction.amount);
         }
         return true;
@@ -104,6 +108,44 @@ class WalletService {
       }
     } catch (e) {
       print("Error adding transaction: $e");
+      return false;
+    }
+  }
+
+  Future<bool> deleteTransaction(int id, Transaction transaction) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+
+      if (token == null) {
+        throw Exception("No token found. User might not be logged in.");
+      }
+
+      final response = await http.delete(
+        Uri.parse("$baseUrl/delete_transaction/$id"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        double currentBalance = prefs.getDouble("balance") ?? 0.0;
+        if (transaction.income) {
+          
+          prefs.setDouble("balance", currentBalance - transaction.amount);
+        } else {
+          
+          prefs.setDouble("balance", currentBalance + transaction.amount);
+        }
+        return true;
+      } else {
+        throw Exception(
+          "Failed to delete transaction: ${response.statusCode} - ${response.body}",
+        );
+      }
+    } catch (e) {
+      print("Error deleting transaction: $e");
       return false;
     }
   }

@@ -1,10 +1,12 @@
 class Transaction {
+  int id;
   final double amount;
   final String name;
   final bool income;
   final String date;
 
   Transaction({
+    required this.id,
     required this.amount,
     required this.name,
     required this.income,
@@ -24,6 +26,7 @@ class Transaction {
   // Convert JSON -> Transaction
   factory Transaction.fromJson(Map<String, dynamic> json) {
     return Transaction(
+      id: json['id'] ?? 0,
       amount: json['amount']?.toDouble() ?? 0.0,
       name: json['name'] ?? '',
       income: json['income'] ?? false,
