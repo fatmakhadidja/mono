@@ -4,14 +4,15 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  String baseUrl = "http://192.168.1.9:8081/api/auth";
+  String baseUrl = "http://192.168.1.7:8081/api/auth";
   String? token;
 
   /// Save token locally in SharedPreferences
-  Future<void> _saveTokenAndFullname(String token, String fullName) async {
+  Future<void> _saveTokenAndFullnameAndEmail(String token, String fullName,String email) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('jwt_token', token);
     await prefs.setString('fullName', fullName);
+    await prefs.setString('email', email);
 
     this.token = token;
   }
@@ -28,8 +29,10 @@ class AuthService {
     await prefs.remove('jwt_token');
     await prefs.remove('fullName');
     await prefs.remove('balance');
+    await prefs.remove('incomeAmount');
+    await prefs.remove('expenseAmount');
     token = null;
-    Navigator.pushReplacementNamed(context, '/login'); // Go to login
+    Navigator.pushReplacementNamed(context, '/login'); 
   }
 
   /// Login and save JWT token
@@ -46,8 +49,9 @@ class AuthService {
       if (response.statusCode == 200) {
         final token = jsonDecode(response.body)['token'];
         final data = jsonDecode(response.body)['fullName'];
-        
-        await _saveTokenAndFullname(token, data ?? "");
+        final email = jsonDecode(response.body)['email'];
+
+        await _saveTokenAndFullnameAndEmail(token, data ?? "", email);
         return null;
       } else if (response.statusCode == 403) {
         return "Invalid credentials";
@@ -82,7 +86,7 @@ class AuthService {
         if (response.body.isNotEmpty) {
           try {
             final token = jsonDecode(response.body)['token'];
-            await _saveTokenAndFullname(token, fullname);
+            await _saveTokenAndFullnameAndEmail(token, fullname, email);
           } catch (_) {}
         }
         return null;

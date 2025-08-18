@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/services/WalletService.dart';
 import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
 import 'package:mono/ui/widgets/home_page.dart';
+import 'package:mono/ui/widgets/profile_page.dart';
 import 'package:mono/ui/widgets/wallet_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -16,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String? fullname;
   final WalletService walletService = WalletService();
 
   late Wallet myWallet = Wallet(
@@ -30,24 +31,17 @@ class _HomeScreenState extends State<HomeScreen> {
   int navIndex = 0;
   String formattedDate = '';
 
-  Future<void> loadFullname() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      fullname = prefs.getString('fullName');
-      print("here is fullname in home $fullname");
-    });
-  }
+
 
   @override
   void initState() {
     super.initState();
-    loadFullname();
-    walletService.getWalletInfo().then((wallet) async { 
+    
+    walletService.getWalletInfo().then((wallet) async {
       if (wallet != null) {
         setState(() {
           myWallet = wallet;
           transactions = wallet.transactions;
-          
         });
       }
     });
@@ -57,18 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final pages = [
       HomePage(
-        fullname: fullname ?? '',
-        transactions: transactions,
         wallet: myWallet,
+        transactions: myWallet.transactions,
       ),
-     Center(child: Text("Statistics Page")),
+      Center(child: Text("Statistics Page")),
       WalletPage(),
-      Center(child: Text("Profile Page")),
+      ProfilePage(),
     ];
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
-      
+
       body: pages[navIndex],
       bottomNavigationBar: BottomNavigationBar(
         elevation: 20,
@@ -110,20 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Container(
-              decoration: BoxDecoration(
-                color: navIndex == 3
-                    ? AppColors.primary.withOpacity(0.1)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-              ),
-              child: SvgPicture.asset(
-                "assets/icons/user.svg",
-                width: 24,
-                height: 24,
-                color: navIndex == 3 ? AppColors.primary : AppColors.darkGrey,
-              ),
+            icon: SvgPicture.asset(
+              "assets/icons/user.svg",
+              width: 24,
+              height: 24,
+              color: navIndex == 3 ? AppColors.primary : AppColors.darkGrey,
             ),
+
             label: "",
           ),
         ],

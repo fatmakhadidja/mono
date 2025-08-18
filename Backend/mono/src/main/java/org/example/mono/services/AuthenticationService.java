@@ -41,7 +41,8 @@ public class AuthenticationService {
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .id(user.getId())
-                .token(jwtToken)
+                .token(jwtToken).
+                email(user.getEmail())
                 .fullName(user.getFullName())
                 .build();    }
 
@@ -66,6 +67,7 @@ public class AuthenticationService {
         return AuthenticationResponse.builder()
                 .id(user.getId())
                 .token(jwtToken)
+                .email(user.getEmail())
                 .fullName(user.getFullName())
                 .build();
     }

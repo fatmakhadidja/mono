@@ -3,7 +3,7 @@ import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 
 class MyFilledButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   const MyFilledButton({super.key, required this.text,required this.onPressed});
 

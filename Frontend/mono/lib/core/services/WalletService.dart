@@ -6,7 +6,7 @@ import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
 
 class WalletService {
-  String baseUrl = "http://192.168.1.9:8081/api/wallet";
+  String baseUrl = "http://192.168.1.7:8081/api/wallet";
 
   Future<Wallet?> getWalletInfo() async {
     try {

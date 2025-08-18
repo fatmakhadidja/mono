@@ -3,12 +3,14 @@ import 'package:mono/ui/screens/home_screen.dart';
 import 'package:mono/ui/screens/login_screen.dart';
 import 'package:mono/ui/screens/onboarding_screen.dart';
 import 'package:mono/ui/screens/register_screen.dart';
+import 'package:mono/ui/widgets/change_fullname.dart';
 
 class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String onboarding = '/onboarding';
   static const String home = '/home';
+  static const String changeFullName = '/changeFullName';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -20,6 +22,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => OnboardingScreen());
         case home:
         return MaterialPageRoute(builder: (_) =>HomeScreen());
+        case changeFullName:
+        return MaterialPageRoute(builder: (_) =>ChangeFullName());
 
       default:
         return MaterialPageRoute(

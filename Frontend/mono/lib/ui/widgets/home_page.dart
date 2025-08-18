@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/core/services/WalletService.dart';
@@ -12,14 +11,13 @@ import 'package:intl/intl.dart';
 import 'package:mono/core/services/AuthService.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// ignore: must_be_immutable
 class HomePage extends StatefulWidget {
-  final String fullname;
   List<Transaction> transactions;
   final Wallet wallet;
 
   HomePage({
     super.key,
-    required this.fullname,
     required this.transactions,
     required this.wallet,
   });
@@ -37,6 +35,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    
+     
+     loadFullname();
     _loadWalletFromPrefs(); // load prefs asynchronously
   }
 
@@ -51,6 +52,17 @@ class _HomePageState extends State<HomePage> {
   }
 
 
+
+  String? fullname;
+
+
+  Future<void> loadFullname() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      fullname = prefs.getString('fullName');
+      print("here is fullname in home $fullname");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                              widget.fullname,
+                             fullname ?? '',
                               style: AppTextStyles.heading1(
                                 color: Colors.white,
                                 fontSize: 20,
