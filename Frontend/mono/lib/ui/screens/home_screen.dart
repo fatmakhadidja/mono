@@ -42,10 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     loadFullname();
-
-    walletService.getWalletInfo().then((wallet) async {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setDouble('balance', wallet!.balance);
+    walletService.getWalletInfo().then((wallet) async { 
       if (wallet != null) {
         setState(() {
           myWallet = wallet;

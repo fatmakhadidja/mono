@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
+import 'package:mono/core/services/WalletService.dart';
 import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
 import 'package:mono/ui/widgets/curved_top.dart';
@@ -29,21 +30,27 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final AuthService authService = AuthService();
+  final WalletService walletService = WalletService();
   String? formattedDate;
-  double balance = 0.0;
+  double? balance;
 
   @override
   void initState() {
     super.initState();
-    _loadBalance(); // load prefs asynchronously
+    _loadWalletFromPrefs(); // load prefs asynchronously
   }
 
-  Future<void> _loadBalance() async {
+    Future<void> _loadWalletFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+
     setState(() {
       balance = prefs.getDouble("balance") ?? 0.0;
+      widget.wallet.incomeAmount = prefs.getDouble("incomeAmount") ?? 0.0;
+      widget.wallet.expenseAmount = prefs.getDouble("expenseAmount") ?? 0.0;
     });
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +115,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
                 child: WalletContainer(
-                  balance: balance,
+                  balance: balance ?? 0.0,
                   incomeAmount: widget.wallet.incomeAmount,
                   expenseAmount: widget.wallet.expenseAmount,
                 ),
@@ -204,8 +211,9 @@ class _HomePageState extends State<HomePage> {
                     (tx) => TransactionRow(
                       onDeleted: () {
                         setState(() {
+                          walletService.deleteTransaction(tx.id,tx);
                           widget.transactions.removeWhere((t) => t.id == tx.id);
-                          _loadBalance();
+                          _loadWalletFromPrefs();
                         });
                       },
                       transaction: tx,

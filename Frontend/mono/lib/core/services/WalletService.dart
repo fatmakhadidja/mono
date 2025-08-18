@@ -7,6 +7,7 @@ import 'package:mono/models/wallet.dart';
 
 class WalletService {
   String baseUrl = "http://192.168.1.9:8081/api/wallet";
+
   Future<Wallet?> getWalletInfo() async {
     try {
       // Retrieve the stored token
@@ -33,7 +34,7 @@ class WalletService {
         List<Transaction> transactions = (data['transactions'] as List)
             .map(
               (t) => Transaction(
-                id : t['id'],
+                id: t['id'],
                 amount: t['amount'],
                 name: t['name'] ?? "",
                 income: t['income'],
@@ -42,20 +43,24 @@ class WalletService {
             )
             .toList();
 
-        // Calculate income and expense amounts
+        // Calculate today's income and expenses
         double incomeAmount = 0.0;
         double expenseAmount = 0.0;
+        String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
         for (var tx in transactions) {
-          if (tx.income &&
-              tx.date ==
-                  DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()) {
-            incomeAmount += tx.amount;
-          } else if (!tx.income &&
-              tx.date ==
-                  DateFormat('yyyy-MM-dd').format(DateTime.now()).toString()) {
-            expenseAmount += tx.amount;
+          if (tx.date == today) {
+            if (tx.income) {
+              incomeAmount += tx.amount;
+            } else {
+              expenseAmount += tx.amount;
+            }
           }
         }
+
+        await prefs.setDouble("balance", data['balance']);
+        await prefs.setDouble("incomeAmount", incomeAmount);
+        await prefs.setDouble("expenseAmount", expenseAmount);
 
         return Wallet(
           balance: data['balance'],
@@ -93,12 +98,22 @@ class WalletService {
       );
 
       if (response.statusCode == 200) {
-         double currentBalance = prefs.getDouble("balance") ?? 0.0;
+        double currentBalance = prefs.getDouble("balance") ?? 0.0;
+        double todayIncome = prefs.getDouble("incomeAmount") ?? 0.0;
+        double todayExpense = prefs.getDouble("expenseAmount") ?? 0.0;
+
+        String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
         if (transaction.income) {
-         
           prefs.setDouble("balance", currentBalance + transaction.amount);
+          if (transaction.date.startsWith(today)) {
+            prefs.setDouble("incomeAmount", todayIncome + transaction.amount);
+          }
         } else {
           prefs.setDouble("balance", currentBalance - transaction.amount);
+          if (transaction.date.startsWith(today)) {
+            prefs.setDouble("expenseAmount", todayExpense + transaction.amount);
+          }
         }
         return true;
       } else {
@@ -131,12 +146,21 @@ class WalletService {
 
       if (response.statusCode == 200) {
         double currentBalance = prefs.getDouble("balance") ?? 0.0;
+        double todayIncome = prefs.getDouble("incomeAmount") ?? 0.0;
+        double todayExpense = prefs.getDouble("expenseAmount") ?? 0.0;
+
+        String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
         if (transaction.income) {
-          
           prefs.setDouble("balance", currentBalance - transaction.amount);
+          if (transaction.date.startsWith(today)) {
+            prefs.setDouble("incomeAmount", todayIncome - transaction.amount);
+          }
         } else {
-          
           prefs.setDouble("balance", currentBalance + transaction.amount);
+          if (transaction.date.startsWith(today)) {
+            prefs.setDouble("expenseAmount", todayExpense - transaction.amount);
+          }
         }
         return true;
       } else {
