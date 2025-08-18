@@ -8,7 +8,8 @@ class ProfileRow extends StatefulWidget {
   final Widget widget;
   final String text;
   final VoidCallback onPressed;
-  const ProfileRow({super.key,required this.widget, required this.text, required this.onPressed });
+  Color? textColor;
+   ProfileRow({super.key,required this.widget, required this.text, required this.onPressed, this.textColor });
 
   @override
   State<ProfileRow> createState() => _ProfileRowState();
@@ -28,7 +29,7 @@ class _ProfileRowState extends State<ProfileRow> {
           Text(
             widget.text,
             style: AppTextStyles.body1(
-              color: AppColors.black,
+              color: widget.textColor ?? AppColors.black,
               fontSize: 16,
             ),
           ),

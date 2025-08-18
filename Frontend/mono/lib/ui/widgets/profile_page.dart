@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
+import 'package:mono/core/services/AuthService.dart';
 import 'package:mono/routes/routes.dart';
 import 'package:mono/ui/widgets/curved_top.dart';
 import 'package:mono/ui/widgets/profile_row.dart';
@@ -122,10 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () {},
                 ),
 
-                Divider(
-                  color: AppColors.lightLightGrey,
-                  thickness: 2,
-                ),
+                Divider(color: AppColors.lightLightGrey, thickness: 2),
 
                 const SizedBox(height: 15),
 
@@ -159,7 +157,39 @@ class _ProfilePageState extends State<ProfilePage> {
                   text: "Change password",
                   onPressed: () {},
                 ),
-
+                const SizedBox(height: 15),
+                ProfileRow(
+                  widget: const Icon(
+                    Icons.logout,
+                    color: AppColors.error,
+                    size: 30,
+                  ),
+                  text: "Log out",
+                  textColor: AppColors.error,
+                  onPressed: () {
+                    showDialog(context: context, builder: (context) {
+                      return AlertDialog(
+                        backgroundColor: Colors.white,
+                        title: Text("Log out"),
+                        content: Text("Are you sure you want to leave the app?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text("Cancel",style: TextStyle(color :AppColors.darkGrey),),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              AuthService().logout(context);
+                            },
+                            child: Text("Log out",style: TextStyle(color :AppColors.error),),
+                          ),
+                        ],
+                      );
+                    });
+                  },
+                ),
                 const Spacer(),
               ],
             ),

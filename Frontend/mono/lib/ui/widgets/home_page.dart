@@ -16,11 +16,7 @@ class HomePage extends StatefulWidget {
   List<Transaction> transactions;
   final Wallet wallet;
 
-  HomePage({
-    super.key,
-    required this.transactions,
-    required this.wallet,
-  });
+  HomePage({super.key, required this.transactions, required this.wallet});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -35,26 +31,21 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    
-     
-     loadFullname();
+
+    loadFullname();
     _loadWalletFromPrefs(); // load prefs asynchronously
   }
 
-    Future<void> _loadWalletFromPrefs() async {
+  Future<void> _loadWalletFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
-
     setState(() {
-      balance = prefs.getDouble("balance") ?? 0.0;
+      balance = prefs.getDouble("balance");
       widget.wallet.incomeAmount = prefs.getDouble("incomeAmount") ?? 0.0;
       widget.wallet.expenseAmount = prefs.getDouble("expenseAmount") ?? 0.0;
     });
   }
 
-
-
   String? fullname;
-
 
   Future<void> loadFullname() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -94,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                             fullname ?? '',
+                              fullname ?? '',
                               style: AppTextStyles.heading1(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -109,7 +100,43 @@ class _HomePageState extends State<HomePage> {
                           ),
                           child: IconButton(
                             onPressed: () {
-                              authService.logout(context);
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    title: Text("Log out"),
+                                    content: Text(
+                                      "Are you sure you want to leave the app?",
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text(
+                                          "Cancel",
+                                          style: TextStyle(
+                                            color: AppColors.darkGrey,
+                                          ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          AuthService().logout(context);
+                                        },
+                                        child: Text(
+                                          "Log out",
+                                          style: TextStyle(
+                                            color: AppColors.error,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                              
                             },
                             icon: const Icon(
                               Icons.logout_rounded,
@@ -223,7 +250,7 @@ class _HomePageState extends State<HomePage> {
                     (tx) => TransactionRow(
                       onDeleted: () {
                         setState(() {
-                          walletService.deleteTransaction(tx.id,tx);
+                          walletService.deleteTransaction(tx.id, tx);
                           widget.transactions.removeWhere((t) => t.id == tx.id);
                           _loadWalletFromPrefs();
                         });

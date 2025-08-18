@@ -63,6 +63,7 @@ class _ChangeFullNameState extends State<ChangeFullName> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       body: Stack(
         children: [
