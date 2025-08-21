@@ -155,7 +155,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     size: 30,
                   ),
                   text: "Change password",
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context,AppRoutes.changePassword);
+                  },
                 ),
                 const SizedBox(height: 15),
                 ProfileRow(

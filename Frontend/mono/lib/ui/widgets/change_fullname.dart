@@ -40,16 +40,29 @@ class _ChangeFullNameState extends State<ChangeFullName> {
     await prefs.setString('fullName', controller.text.trim());
   }
 
-  Future<void> _handleSave() async {
-    setState(() => _isLoading = true);
+Future<void> _handleSave() async {
+  setState(() => _isLoading = true);
 
-    await _saveFullName();
-    await profileservice.changeFullname(controller.text);
+  final result = await profileservice.changeFullname(controller.text);
 
-    if (mounted) {
+  if (mounted) {
+    setState(() => _isLoading = false);
+
+    if (result == null) {
+      await _saveFullName(); 
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Full name updated successfully")),
+      );
       Navigator.pop(context);
+    } else {
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result)),
+      );
     }
   }
+}
+
 
   @override
   void dispose() {

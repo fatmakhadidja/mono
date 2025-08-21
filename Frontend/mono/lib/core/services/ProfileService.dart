@@ -25,13 +25,40 @@ try {
       );
 
       if (response.statusCode == 200) {
+        
         print("Seccesfully changed full name !");
         return null;
       }
 } catch (e) {
       print("Error changing fullname: $e");
-      return null;
+      return "Error changing fullname: $e";
     }
   }
+
+Future<String?> changePassword(String currentPassword, String newPassword) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token');
+
+    if (token == null) {
+      throw Exception("No token found. User might not be logged in.");
+    }
+
+    final response = await http.put(
+  Uri.parse("$baseUrl/change_password?currentPassword=$currentPassword&newPassword=$newPassword"),
+  headers: {
+    'Authorization': 'Bearer $token',
+  },
+);
+    if (response.statusCode == 200) {
+      
+      return null;
+    } else if(response.statusCode ==400 && response.body=="Current password is incorrect") {
+      return "Current password is incorrect";
+    }
+  } catch (e) {
+    return "Error changing password: $e";
+  }
+}
 
 }
