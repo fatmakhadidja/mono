@@ -6,6 +6,7 @@ import 'package:mono/routes/routes.dart';
 import 'package:mono/ui/widgets/curved_top.dart';
 import 'package:mono/ui/widgets/profile_row.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -120,7 +121,13 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Image.asset('assets/images/diamond.png'),
                   ),
                   text: "Invite Friends",
-                  onPressed: () {},
+                  onPressed: () {
+                    const String inviteUrl = "https://www.google.com";
+                    Share.share(
+                      "Check out this amazing app! Download it here: $inviteUrl",
+                      subject: "Join me on this app!",
+                    );
+                  },
                 ),
 
                 Divider(color: AppColors.lightLightGrey, thickness: 2),
@@ -156,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   text: "Change password",
                   onPressed: () {
-                    Navigator.pushNamed(context,AppRoutes.changePassword);
+                    Navigator.pushNamed(context, AppRoutes.changePassword);
                   },
                 ),
                 const SizedBox(height: 15),
@@ -169,27 +176,38 @@ class _ProfilePageState extends State<ProfilePage> {
                   text: "Log out",
                   textColor: AppColors.error,
                   onPressed: () {
-                    showDialog(context: context, builder: (context) {
-                      return AlertDialog(
-                        backgroundColor: Colors.white,
-                        title: Text("Log out"),
-                        content: Text("Are you sure you want to leave the app?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text("Cancel",style: TextStyle(color :AppColors.darkGrey),),
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.white,
+                          title: Text("Log out"),
+                          content: Text(
+                            "Are you sure you want to leave the app?",
                           ),
-                          TextButton(
-                            onPressed: () {
-                              AuthService().logout(context);
-                            },
-                            child: Text("Log out",style: TextStyle(color :AppColors.error),),
-                          ),
-                        ],
-                      );
-                    });
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(color: AppColors.darkGrey),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                AuthService().logout(context);
+                              },
+                              child: Text(
+                                "Log out",
+                                style: TextStyle(color: AppColors.error),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                 ),
                 const Spacer(),
