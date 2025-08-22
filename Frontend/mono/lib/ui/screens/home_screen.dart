@@ -6,6 +6,7 @@ import 'package:mono/models/wallet.dart';
 import 'package:mono/ui/widgets/home_page.dart';
 import 'package:mono/ui/widgets/home_skeleton.dart';
 import 'package:mono/ui/widgets/profile_page.dart';
+import 'package:mono/ui/widgets/stat_page.dart';
 import 'package:mono/ui/widgets/wallet_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
           myWallet = wallet;
           transactions = wallet.transactions;
         }
-        _isLoading = false; 
+        _isLoading = false;
       });
     }
   }
@@ -54,21 +55,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(
-        wallet: myWallet,
-        transactions: myWallet.transactions,
-      ),
-      const Center(child: Text("Statistics Page")),
+      HomePage(wallet: myWallet, transactions: myWallet.transactions),
+      StatPage(transactions: myWallet.transactions),
       const WalletPage(),
       const ProfilePage(),
     ];
 
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
-      body: _isLoading
-          ? const HomeSkeleton()
-          : pages[navIndex],
+      body: _isLoading ? const HomeSkeleton() : pages[navIndex],
       bottomNavigationBar: _isLoading
           ? null // 🔹 hide navbar while loading
           : BottomNavigationBar(
@@ -88,7 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/home.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 0 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 0
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -97,7 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/stat.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 1 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 1
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -106,7 +106,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/wallet.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 2 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 2
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -115,7 +117,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/user.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 3 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 3
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),

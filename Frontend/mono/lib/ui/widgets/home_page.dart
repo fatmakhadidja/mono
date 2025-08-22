@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     loadFullname();
-    _loadWalletFromPrefs(); // load prefs asynchronously
+    _loadWalletFromPrefs(); 
   }
 
   Future<void> _loadWalletFromPrefs() async {
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       fullname = prefs.getString('fullName');
-      print("here is fullname in home $fullname");
+      
     });
   }
 
