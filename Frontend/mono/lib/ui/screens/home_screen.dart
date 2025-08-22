@@ -21,33 +21,23 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final WalletService walletService = WalletService();
+
   Wallet myWallet = Wallet(
     balance: 0.0,
     incomeAmount: 0.0,
     expenseAmount: 0.0,
     transactions: [],
   );
-
   List<Transaction> transactions = [];
   int navIndex = 0;
   bool _isLoading = true;
-  Uint8List? _profilePic;
+  Uint8List? _profilePic; // reactive profile picture
 
   @override
   void initState() {
     super.initState();
     _loadWallet();
     _loadProfilePic();
-  }
-
-  Future<void> _loadProfilePic() async {
-    final service = Profileservice();
-    final pic = await service.getProfilePic();
-    if (mounted) {
-      setState(() {
-        _profilePic = pic;
-      });
-    }
   }
 
   Future<void> _loadWallet() async {
@@ -63,13 +53,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _loadProfilePic() async {
+    final service = Profileservice();
+    final pic = await service.getProfilePic();
+    if (mounted) {
+      setState(() {
+        _profilePic = pic;
+      });
+    }
+  }
+
+  void _updateProfilePic(Uint8List newPic) async {
+      setState(() {
+        _profilePic = newPic; // update UI immediately
+      });
+  
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = [
       HomePage(wallet: myWallet, transactions: myWallet.transactions),
       StatPage(transactions: myWallet.transactions),
-      const WalletPage(),
-      ProfilePage(profilePic: _profilePic), // Pass profile picture
+      WalletPage(),
+      ProfilePage(
+        profilePic: _profilePic,
+        onProfilePicChanged: _updateProfilePic,
+      ), // pass callback
     ];
 
     return Scaffold(
@@ -84,11 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: false,
               showUnselectedLabels: false,
-              onTap: (index) {
-                setState(() {
-                  navIndex = index;
-                });
-              },
+              onTap: (index) => setState(() => navIndex = index),
               currentIndex: navIndex,
               items: [
                 BottomNavigationBarItem(

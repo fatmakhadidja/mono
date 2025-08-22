@@ -87,4 +87,37 @@ class Profileservice {
       return null;
     }
   }
+
+
+  Future<String?> changeProfilePicture(Uint8List imageBytes) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('jwt_token');
+      if (token == null) throw Exception("No token found. User might not be logged in.");
+
+      // Convert image bytes to Base64
+      final base64Image = base64Encode(imageBytes);
+
+      final response = await http.put(
+        Uri.parse("$baseUrl/change_picture"),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'image': base64Image}),
+      );
+
+      if (response.statusCode == 200) {
+        print("Profile picture updated successfully!");
+        return null;
+      } else {
+        print("Failed to update profile picture. Status: ${response.statusCode}");
+        return "Failed to update profile picture. Status: ${response.statusCode}";
+      }
+    } catch (e) {
+      print("Error updating profile picture: $e");
+      return "Error updating profile picture: $e";
+    }
+  }
+  
 }

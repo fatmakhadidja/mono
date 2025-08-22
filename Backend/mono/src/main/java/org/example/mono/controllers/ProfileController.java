@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Base64;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileController {
@@ -103,4 +106,39 @@ public class ProfileController {
                 .contentType(MediaType.IMAGE_JPEG) // or IMAGE_PNG depending on what you save
                 .body(user.getProfileImage());
     }
+
+
+    @PutMapping("/change_picture")
+    public ResponseEntity<?> changeProfilePicture(@RequestBody Map<String, String> body) {
+        try {
+            String base64Image = body.get("image");
+            if (base64Image == null || base64Image.isEmpty()) {
+                return ResponseEntity.badRequest().body("No image provided");
+            }
+
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String email;
+            if (principal instanceof UserDetails) {
+                email = ((UserDetails) principal).getUsername();
+            } else {
+                email = principal.toString();
+            }
+
+            User user = userRepo.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Decode Base64 string and save as byte[]
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            user.setProfileImage(imageBytes);
+            userRepo.save(user);
+
+            return ResponseEntity.ok("Profile picture updated successfully");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating profile picture: " + e.getMessage());
+        }
+    }
+
+
 }
