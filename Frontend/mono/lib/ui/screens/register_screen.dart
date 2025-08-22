@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; 
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/core/services/AuthService.dart';
@@ -29,6 +31,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
+  File? _selectedImage; // 👈 hold picked image
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+      });
+    }
+  }
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
@@ -37,25 +51,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final String? error = await _authService.register(
       fullNameController.text.trim(),
-      
       passwordController.text.trim(),
       emailController.text.trim(),
+      _selectedImage,
     );
 
     if (!_isLoading) return;
     setState(() => _isLoading = false);
 
     if (error == null) {
-      // Registration successful
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Registration successful!")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Registration successful!")),
+      );
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
-      // Show error
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
     }
   }
 
@@ -78,11 +90,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       top: 150,
                       left: 0,
                       right: 0,
-                      child: Image.asset("assets/images/wallet_with_cash.png"),
+                      child: GestureDetector(
+                        onTap: _pickImage,
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage:
+                              _selectedImage != null ? FileImage(_selectedImage!) : null,
+                          child: _selectedImage == null
+                              ? const Icon(Icons.camera_alt, size: 40, color: Colors.black54)
+                              : null,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 25),
+                const SizedBox(height: 25),
                 Form(
                   key: _formKey,
                   child: Padding(
@@ -148,17 +171,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
         if (_isLoading)
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _isLoading = false;
-              });
-            },
-            child: Container(
-              color: Colors.black.withOpacity(0.4),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.primary),
-              ),
+          Container(
+            color: Colors.black.withOpacity(0.4),
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
             ),
           ),
       ],

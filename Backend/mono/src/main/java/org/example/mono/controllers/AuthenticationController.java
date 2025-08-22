@@ -37,7 +37,7 @@ public class AuthenticationController {
     private UserRepo userRepo;
 
 
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = {"multipart/form-data"})
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             var result = service.register(request);
@@ -48,7 +48,7 @@ public class AuthenticationController {
                     userRepo.findById(result.getId())
                             .orElseThrow(() -> new RuntimeException("User not found"))
             );
-           walletRepo.save(wallet);
+            walletRepo.save(wallet);
 
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
@@ -58,6 +58,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Server error");
         }
     }
+
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request

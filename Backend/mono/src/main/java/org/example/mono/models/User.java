@@ -36,6 +36,10 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Lob
+    @Column(columnDefinition = "BYTEA")
+    private byte[] profileImage;
+
     public enum Role {
         USER,
     }

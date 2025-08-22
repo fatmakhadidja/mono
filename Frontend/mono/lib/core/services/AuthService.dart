@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,7 +9,11 @@ class AuthService {
   String? token;
 
   /// Save token locally in SharedPreferences
-  Future<void> _saveTokenAndFullnameAndEmail(String token, String fullName,String email) async {
+  Future<void> _saveTokenAndFullnameAndEmail(
+    String token,
+    String fullName,
+    String email,
+  ) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('jwt_token', token);
     await prefs.setString('fullName', fullName);
@@ -32,7 +37,7 @@ class AuthService {
     await prefs.remove('incomeAmount');
     await prefs.remove('expenseAmount');
     token = null;
-    Navigator.pushReplacementNamed(context, '/login'); 
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   /// Login and save JWT token
@@ -63,24 +68,29 @@ class AuthService {
     }
   }
 
-  /// Register new user
   Future<String?> register(
     String fullname,
     String password,
     String email,
+    File? imageFile,
   ) async {
     try {
-      final response = await http
-          .post(
-            Uri.parse('$baseUrl/register'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'fullName': fullname,
-              'password': password,
-              'email': email,
-            }),
-          )
-          .timeout(Duration(seconds: 5));
+      String? imageBase64;
+      if (imageFile != null) {
+        final bytes = await imageFile.readAsBytes();
+        imageBase64 = base64Encode(bytes);
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/register'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'fullName': fullname,
+          'password': password,
+          'email': email,
+          'imageBase64': imageBase64, // send image as Base64
+        }),
+      );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.body.isNotEmpty) {

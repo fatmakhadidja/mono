@@ -27,25 +27,37 @@ public class AuthenticationService {
 
 
     public AuthenticationResponse register(RegisterRequest request) {
-        // Check if email already exists
         if (userRepo.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        var user = User.builder().fullName(request.getFullName()).
-                email(request.getEmail()).
-                role(User.Role.USER).
-                password(passwordEncoder.encode(request.getPassword())).
-                build();
+
+        byte[] imageData = null;
+        try {
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                imageData = request.getImage().getBytes();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read image file", e);
+        }
+
+        var user = User.builder()
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .role(User.Role.USER)
+                .password(passwordEncoder.encode(request.getPassword()))
+                .profileImage(imageData) // save image here
+                .build();
+
         userRepo.save(user);
 
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .id(user.getId())
-                .token(jwtToken).
-                email(user.getEmail())
+                .token(jwtToken)
+                .email(user.getEmail())
                 .fullName(user.getFullName())
-                .build();    }
-
+                .build();
+    }
 
 
 
