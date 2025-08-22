@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:mono/core/constants/colors.dart';
 import 'package:mono/core/constants/text_styles.dart';
@@ -9,7 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final Uint8List? profilePic; // Accept picture from HomeScreen
+
+  const ProfilePage({super.key, this.profilePic});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -18,12 +21,14 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late String fullName;
   late String email;
+  Uint8List? _profilePic;
 
   @override
   void initState() {
     super.initState();
     fullName = '';
     email = '';
+    _profilePic = widget.profilePic; // Initialize from passed picture
     _loadFullName();
     _loadEmail();
   }
@@ -31,17 +36,21 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadFullName() async {
     final prefs = await SharedPreferences.getInstance();
     final savedName = prefs.getString('fullName') ?? '';
-    setState(() {
-      fullName = savedName;
-    });
+    if (mounted) {
+      setState(() {
+        fullName = savedName;
+      });
+    }
   }
 
   Future<void> _loadEmail() async {
     final prefs = await SharedPreferences.getInstance();
     final savedEmail = prefs.getString('email') ?? '';
-    setState(() {
-      email = savedEmail;
-    });
+    if (mounted) {
+      setState(() {
+        email = savedEmail;
+      });
+    }
   }
 
   @override
@@ -79,23 +88,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ],
                 ),
-
                 const Spacer(),
-
-                // profile picture
                 Container(
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     color: AppColors.white,
                   ),
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     backgroundColor: Colors.white,
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/images/Profile.png'),
+                    radius: 60,
+                    backgroundImage: _profilePic != null
+                        ? MemoryImage(_profilePic!)
+                        : const AssetImage('assets/images/Profile.png')
+                            as ImageProvider,
                   ),
                 ),
-
-                // full name
+                const SizedBox(height: 10),
                 Text(
                   fullName,
                   style: AppTextStyles.body1(
@@ -103,8 +111,6 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontSize: 16,
                   ),
                 ),
-
-                // email
                 Text(
                   email,
                   style: AppTextStyles.body1(
@@ -112,8 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontSize: 14,
                   ),
                 ),
-
-                // invite friends row
+                const SizedBox(height: 25),
                 ProfileRow(
                   widget: CircleAvatar(
                     backgroundColor: const Color(0xffF0F6F5),
@@ -129,12 +134,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                   },
                 ),
-
                 Divider(color: AppColors.lightLightGrey, thickness: 2),
-
                 const SizedBox(height: 15),
-
-                // change full name row
                 ProfileRow(
                   widget: const Icon(
                     Icons.person,
@@ -147,14 +148,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       context,
                       AppRoutes.changeFullName,
                     );
-
-                    _loadFullName(); // reload only the full name after pop
+                    _loadFullName();
                   },
                 ),
-
                 const SizedBox(height: 15),
-
-                // change password row
                 ProfileRow(
                   widget: const Icon(
                     Icons.security,
@@ -181,8 +178,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       builder: (context) {
                         return AlertDialog(
                           backgroundColor: Colors.white,
-                          title: Text("Log out"),
-                          content: Text(
+                          title: const Text("Log out"),
+                          content: const Text(
                             "Are you sure you want to leave the app?",
                           ),
                           actions: [
@@ -190,7 +187,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               onPressed: () {
                                 Navigator.of(context).pop();
                               },
-                              child: Text(
+                              child: const Text(
                                 "Cancel",
                                 style: TextStyle(color: AppColors.darkGrey),
                               ),
@@ -199,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               onPressed: () {
                                 AuthService().logout(context);
                               },
-                              child: Text(
+                              child: const Text(
                                 "Log out",
                                 style: TextStyle(color: AppColors.error),
                               ),

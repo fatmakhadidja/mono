@@ -68,47 +68,48 @@ class AuthService {
     }
   }
 
-  Future<String?> register(
-    String fullname,
-    String password,
-    String email,
-    File? imageFile,
-  ) async {
-    try {
-      String? imageBase64;
-      if (imageFile != null) {
-        final bytes = await imageFile.readAsBytes();
-        imageBase64 = base64Encode(bytes);
-      }
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/register'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'fullName': fullname,
-          'password': password,
-          'email': email,
-          'imageBase64': imageBase64, // send image as Base64
-        }),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.body.isNotEmpty) {
-          try {
-            final token = jsonDecode(response.body)['token'];
-            await _saveTokenAndFullnameAndEmail(token, fullname, email);
-          } catch (_) {}
-        }
-        return null;
-      } else if (response.statusCode == 409) {
-        return "The email you entered already exists";
-      } else {
-        return "Registration failed. Server returned ${response.statusCode}";
-      }
-    } catch (e) {
-      return "Registration error: $e";
+Future<String?> register(
+  String fullname,
+  String password,
+  String email,
+  File? imageFile,
+) async {
+  try {
+    String? base64Image;
+    if (imageFile != null) {
+      // Convert image file to Base64
+      final bytes = await imageFile.readAsBytes();
+      base64Image = base64Encode(bytes);
     }
+
+    // JSON body
+    final body = jsonEncode({
+      "fullName": fullname,
+      "password": password,
+      "email": email,
+      "image": base64Image, // can be null
+    });
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: {"Content-Type": "application/json"},
+      body: body,
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final token = jsonDecode(response.body)['token'];
+      await _saveTokenAndFullnameAndEmail(token, fullname, email);
+      return null;
+    } else if (response.statusCode == 409) {
+      return "The email you entered already exists";
+    } else {
+      return "Registration failed. Server returned ${response.statusCode}";
+    }
+  } catch (e) {
+    return "Registration error: $e";
   }
+}
 
   /// Example of calling a protected endpoint
   Future<String?> getProtectedData() async {

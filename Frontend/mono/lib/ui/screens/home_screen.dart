@@ -1,5 +1,7 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:mono/core/constants/colors.dart';
+import 'package:mono/core/services/ProfileService.dart';
 import 'package:mono/core/services/WalletService.dart';
 import 'package:mono/models/transaction.dart';
 import 'package:mono/models/wallet.dart';
@@ -19,7 +21,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final WalletService walletService = WalletService();
-
   Wallet myWallet = Wallet(
     balance: 0.0,
     incomeAmount: 0.0,
@@ -29,14 +30,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Transaction> transactions = [];
   int navIndex = 0;
-  String formattedDate = '';
-
-  bool _isLoading = true; // 🔹 Track loading state
+  bool _isLoading = true;
+  Uint8List? _profilePic;
 
   @override
   void initState() {
     super.initState();
     _loadWallet();
+    _loadProfilePic();
+  }
+
+  Future<void> _loadProfilePic() async {
+    final service = Profileservice();
+    final pic = await service.getProfilePic();
+    if (mounted) {
+      setState(() {
+        _profilePic = pic;
+      });
+    }
   }
 
   Future<void> _loadWallet() async {
@@ -58,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       HomePage(wallet: myWallet, transactions: myWallet.transactions),
       StatPage(transactions: myWallet.transactions),
       const WalletPage(),
-      const ProfilePage(),
+      ProfilePage(profilePic: _profilePic), // Pass profile picture
     ];
 
     return Scaffold(
@@ -66,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       body: _isLoading ? const HomeSkeleton() : pages[navIndex],
       bottomNavigationBar: _isLoading
-          ? null // 🔹 hide navbar while loading
+          ? null
           : BottomNavigationBar(
               elevation: 20,
               backgroundColor: Colors.white,
@@ -78,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   navIndex = index;
                 });
               },
+              currentIndex: navIndex,
               items: [
                 BottomNavigationBarItem(
                   icon: SvgPicture.asset(
@@ -124,7 +136,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   label: "",
                 ),
               ],
-              currentIndex: navIndex,
             ),
     );
   }

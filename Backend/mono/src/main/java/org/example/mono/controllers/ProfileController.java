@@ -5,6 +5,7 @@ import org.example.mono.models.User;
 import org.example.mono.repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -79,5 +80,27 @@ public class ProfileController {
                     .body("Error changing password: " + e.getMessage());
         }
     }
+    @GetMapping("/picture")
+    public ResponseEntity<byte[]> getProfilePicture() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        String email;
+        if (principal instanceof UserDetails) {
+            email = ((UserDetails) principal).getUsername();
+        } else {
+            email = principal.toString();
+        }
+
+        // Get the user entity from the email
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.getProfileImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // or IMAGE_PNG depending on what you save
+                .body(user.getProfileImage());
+    }
 }
