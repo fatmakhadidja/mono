@@ -225,7 +225,7 @@ class _StatPageState extends State<StatPage> {
                       onDeleted: () {},
                       id: tx.id,
                       title: tx.name,
-                      date: DateFormat('dd MMM').format(parsedDate),
+                      date: DateFormat('dd MMM yyyy').format(parsedDate),
                       amount: tx.amount,
                       income: tx.income,
                       transaction: tx,

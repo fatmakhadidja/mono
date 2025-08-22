@@ -33,7 +33,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     loadFullname();
-    _loadWalletFromPrefs(); 
+    _loadWalletFromPrefs();
   }
 
   Future<void> _loadWalletFromPrefs() async {
@@ -51,7 +51,6 @@ class _HomePageState extends State<HomePage> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       fullname = prefs.getString('fullName');
-      
     });
   }
 
@@ -136,7 +135,6 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 },
                               );
-                              
                             },
                             icon: const Icon(
                               Icons.logout_rounded,
@@ -230,40 +228,28 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
 
-        ...(widget.transactions.isEmpty
-            ? [
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Center(
-                    child: Text(
-                      "No transactions yet",
-                      style: AppTextStyles.body1(
-                        color: AppColors.darkGrey,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ]
-            : widget.transactions
-                  .map(
-                    (tx) => TransactionRow(
-                      onDeleted: () {
-                        setState(() {
-                          walletService.deleteTransaction(tx.id, tx);
-                          widget.transactions.removeWhere((t) => t.id == tx.id);
-                          _loadWalletFromPrefs();
-                        });
-                      },
-                      transaction: tx,
-                      id: tx.id,
-                      title: tx.name,
-                      date: tx.date,
-                      amount: tx.amount,
-                      income: tx.income,
-                    ),
-                  )
-                  .toList()),
+        ...widget.transactions.map((tx) {
+          // Parse tx.date ("yyyy-MM-dd") into DateTime
+          final parsedDate = DateFormat('yyyy-MM-dd').parse(tx.date);
+          // Format into dd MMM yyyy
+          final formattedDate = DateFormat('dd MMM yyyy').format(parsedDate);
+
+          return TransactionRow(
+            onDeleted: () {
+              setState(() {
+                walletService.deleteTransaction(tx.id, tx);
+                widget.transactions.removeWhere((t) => t.id == tx.id);
+                _loadWalletFromPrefs();
+              });
+            },
+            transaction: tx,
+            id: tx.id,
+            title: tx.name,
+            date: formattedDate, // ✅ formatted date
+            amount: tx.amount,
+            income: tx.income,
+          );
+        }).toList(),
       ],
     );
   }

@@ -23,7 +23,7 @@ class DailyLineChart extends StatelessWidget {
           minY: 0,
           maxY: dailyData.isEmpty
               ? 10
-              : (dailyData.reduce((a, b) => a > b ? a : b)) + 10,
+              : (dailyData.reduce((a, b) => a > b ? a : b)) ,
           gridData: FlGridData(show: true),
           borderData: FlBorderData(show: false),
           titlesData: FlTitlesData(
