@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mono/core/constants/text_styles.dart';
 import 'package:mono/core/services/WalletService.dart';
 import 'package:mono/models/transaction.dart';
+import 'package:mono/models/wallet.dart';
 import 'package:mono/routes/routes.dart';
 import 'package:mono/ui/widgets/curved_top.dart';
 import 'package:mono/ui/widgets/filled_button.dart';
@@ -9,7 +10,13 @@ import 'package:mono/ui/widgets/transaction_container.dart';
 import 'package:intl/intl.dart';
 
 class WalletPage extends StatefulWidget {
-  const WalletPage({super.key});
+  final Wallet wallet;
+  final Function(Wallet, List<Transaction>) onTransactionAdded;
+  const WalletPage({
+    super.key,
+    required this.wallet,
+    required this.onTransactionAdded,
+  });
 
   @override
   State<WalletPage> createState() => _WalletPageState();
@@ -113,10 +120,30 @@ class _WalletPageState extends State<WalletPage> {
                                     ),
                                   ),
                                 );
-                                Navigator.pushReplacementNamed(
-                                  context,
-                                  AppRoutes.home,
+
+                                // Update HomeScreen
+                                final updatedTransactions =
+                                    List<Transaction>.from(
+                                      widget.wallet.transactions,
+                                    );
+                                updatedTransactions.add(transaction);
+
+                                
+                                if (transaction.income) {
+                                  widget.wallet.incomeAmount +=
+                                      transaction.amount;
+                                  widget.wallet.balance += transaction.amount;
+                                } else {
+                                  widget.wallet.expenseAmount +=
+                                      transaction.amount;
+                                  widget.wallet.balance -= transaction.amount;
+                                }
+
+                                widget.onTransactionAdded(
+                                  widget.wallet,
+                                  updatedTransactions,
                                 );
+                                
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(

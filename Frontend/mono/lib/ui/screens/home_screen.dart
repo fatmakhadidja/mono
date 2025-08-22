@@ -81,11 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
- void _updateFullName(String newName) {
-  setState(() {
-    fullname = newName;
-  });
-}
+  void _updateFullName(String newName) {
+    setState(() {
+      fullname = newName;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,15 +94,24 @@ class _HomeScreenState extends State<HomeScreen> {
         wallet: myWallet,
         transactions: transactions,
         fullName: fullname,
-       
+
         onWalletUpdated: (updatedWallet) {
           setState(() {
             myWallet = updatedWallet;
+            transactions = updatedWallet.transactions;
           });
         },
       ),
       StatPage(transactions: transactions),
-      WalletPage(),
+      WalletPage(
+        wallet: myWallet,
+        onTransactionAdded: (updatedWallet, updatedTransactions) {
+          setState(() {
+            myWallet = updatedWallet;
+            transactions = updatedTransactions;
+          });
+        },
+      ),
       ProfilePage(
         profilePic: _profilePic,
         fullName: fullname,
@@ -132,7 +141,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/home.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 0 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 0
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -141,7 +152,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/stat.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 1 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 1
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -150,7 +163,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/wallet.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 2 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 2
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -159,7 +174,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/user.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 3 ? AppColors.primary : AppColors.darkGrey,
+                    color: navIndex == 3
+                        ? AppColors.primary
+                        : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
