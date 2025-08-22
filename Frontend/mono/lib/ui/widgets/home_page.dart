@@ -15,8 +15,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 class HomePage extends StatefulWidget {
   List<Transaction> transactions;
   final Wallet wallet;
+  final String fullName;
 
-  HomePage({super.key, required this.transactions, required this.wallet});
+  final Function(Wallet) onWalletUpdated;
+
+  HomePage({
+    super.key,
+    required this.transactions,
+    required this.wallet,
+    required this.fullName,
+
+    required this.onWalletUpdated,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,32 +36,10 @@ class _HomePageState extends State<HomePage> {
   final AuthService authService = AuthService();
   final WalletService walletService = WalletService();
   String? formattedDate;
-  double? balance;
 
   @override
   void initState() {
     super.initState();
-
-    loadFullname();
-    _loadWalletFromPrefs();
-  }
-
-  Future<void> _loadWalletFromPrefs() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      balance = prefs.getDouble("balance");
-      widget.wallet.incomeAmount = prefs.getDouble("incomeAmount") ?? 0.0;
-      widget.wallet.expenseAmount = prefs.getDouble("expenseAmount") ?? 0.0;
-    });
-  }
-
-  String? fullname;
-
-  Future<void> loadFullname() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      fullname = prefs.getString('fullName');
-    });
   }
 
   @override
@@ -84,7 +72,7 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             Text(
-                              fullname ?? '',
+                              widget.fullName,
                               style: AppTextStyles.heading1(
                                 color: Colors.white,
                                 fontSize: 20,
@@ -152,7 +140,7 @@ class _HomePageState extends State<HomePage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 150, 0, 0),
                 child: WalletContainer(
-                  balance: balance ?? 0.0,
+                  balance: widget.wallet.balance,
                   incomeAmount: widget.wallet.incomeAmount,
                   expenseAmount: widget.wallet.expenseAmount,
                 ),
@@ -239,13 +227,23 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 walletService.deleteTransaction(tx.id, tx);
                 widget.transactions.removeWhere((t) => t.id == tx.id);
-                _loadWalletFromPrefs();
+
+                if (tx.income) {
+                  widget.wallet.incomeAmount -= tx.amount;
+                  widget.wallet.balance -= tx.amount;
+                } else {
+                  widget.wallet.expenseAmount -= tx.amount;
+                  widget.wallet.balance += tx.amount;
+                }
+
+                widget.onWalletUpdated(widget.wallet);
               });
             },
+
             transaction: tx,
             id: tx.id,
             title: tx.name,
-            date: formattedDate, // ✅ formatted date
+            date: formattedDate,
             amount: tx.amount,
             income: tx.income,
           );

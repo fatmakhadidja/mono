@@ -11,6 +11,7 @@ import 'package:mono/ui/widgets/profile_page.dart';
 import 'package:mono/ui/widgets/stat_page.dart';
 import 'package:mono/ui/widgets/wallet_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,23 +32,34 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Transaction> transactions = [];
   int navIndex = 0;
   bool _isLoading = true;
-  Uint8List? _profilePic; // reactive profile picture
+  Uint8List? _profilePic;
+  String fullname = '';
+  String email = '';
+  double balance = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _loadWallet();
+    _loadHomeData();
     _loadProfilePic();
   }
 
-  Future<void> _loadWallet() async {
+  Future<void> _loadHomeData() async {
     final wallet = await walletService.getWalletInfo();
+    final prefs = await SharedPreferences.getInstance();
+    final savedFullname = prefs.getString('fullName') ?? '';
+    final savedEmail = prefs.getString('email') ?? '';
+    final savedBalance = prefs.getDouble('balance') ?? 0.0;
+
     if (mounted) {
       setState(() {
         if (wallet != null) {
           myWallet = wallet;
           transactions = wallet.transactions;
         }
+        fullname = savedFullname;
+        email = savedEmail;
+        balance = savedBalance;
         _isLoading = false;
       });
     }
@@ -63,23 +75,41 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _updateProfilePic(Uint8List newPic) async {
-      setState(() {
-        _profilePic = newPic; // update UI immediately
-      });
-  
+  void _updateProfilePic(Uint8List newPic) {
+    setState(() {
+      _profilePic = newPic;
+    });
   }
+
+ void _updateFullName(String newName) {
+  setState(() {
+    fullname = newName;
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      HomePage(wallet: myWallet, transactions: myWallet.transactions),
-      StatPage(transactions: myWallet.transactions),
+      HomePage(
+        wallet: myWallet,
+        transactions: transactions,
+        fullName: fullname,
+       
+        onWalletUpdated: (updatedWallet) {
+          setState(() {
+            myWallet = updatedWallet;
+          });
+        },
+      ),
+      StatPage(transactions: transactions),
       WalletPage(),
       ProfilePage(
         profilePic: _profilePic,
+        fullName: fullname,
+        email: email,
         onProfilePicChanged: _updateProfilePic,
-      ), // pass callback
+        onFullNameChanged: _updateFullName,
+      ),
     ];
 
     return Scaffold(
@@ -102,9 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/home.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 0
-                        ? AppColors.primary
-                        : AppColors.darkGrey,
+                    color: navIndex == 0 ? AppColors.primary : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -113,9 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/stat.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 1
-                        ? AppColors.primary
-                        : AppColors.darkGrey,
+                    color: navIndex == 1 ? AppColors.primary : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -124,9 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/wallet.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 2
-                        ? AppColors.primary
-                        : AppColors.darkGrey,
+                    color: navIndex == 2 ? AppColors.primary : AppColors.darkGrey,
                   ),
                   label: "",
                 ),
@@ -135,9 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     "assets/icons/user.svg",
                     width: 24,
                     height: 24,
-                    color: navIndex == 3
-                        ? AppColors.primary
-                        : AppColors.darkGrey,
+                    color: navIndex == 3 ? AppColors.primary : AppColors.darkGrey,
                   ),
                   label: "",
                 ),

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mono/core/constants/colors.dart';
@@ -14,76 +13,73 @@ import 'package:share_plus/share_plus.dart';
 
 class ProfilePage extends StatefulWidget {
   final Uint8List? profilePic; // initial picture from HomeScreen
+  final Function(String) onFullNameChanged;
+  String fullName;
+  final String email;
   final Function(Uint8List) onProfilePicChanged; // callback to update parent
 
-  const ProfilePage({super.key, this.profilePic, required this.onProfilePicChanged});
+  ProfilePage({
+    super.key,
+    this.profilePic,
+    required this.onProfilePicChanged,
+    required this.onFullNameChanged,
+    required this.fullName,
+    required this.email,
+  });
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late String fullName;
-  late String email;
   Uint8List? _profilePic;
 
   @override
   void initState() {
     super.initState();
-    fullName = '';
-    email = '';
-    _profilePic = widget.profilePic; // initial picture
-    _loadFullName();
-    _loadEmail();
+
+    _profilePic = widget.profilePic;
   }
 
-  Future<void> _loadFullName() async {
+  void _loadFullName() async {
     final prefs = await SharedPreferences.getInstance();
     final savedName = prefs.getString('fullName') ?? '';
     if (mounted) {
       setState(() {
-        fullName = savedName;
+        widget.fullName = savedName;
       });
+      widget.onFullNameChanged(savedName); 
     }
   }
 
-  Future<void> _loadEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedEmail = prefs.getString('email') ?? '';
-    if (mounted) {
-      setState(() {
-        email = savedEmail;
-      });
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      final bytes = await picked.readAsBytes();
+
+      // Call backend to update picture
+      final profileService = Profileservice();
+      final String? error = await profileService.changeProfilePicture(bytes);
+
+      if (error == null) {
+        setState(() {
+          _profilePic = bytes;
+        });
+        widget.onProfilePicChanged(bytes);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Profile picture updated successfully!"),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to update profile picture: $error")),
+        );
+      }
     }
   }
-
-Future<void> _pickImage() async {
-  final picker = ImagePicker();
-  final picked = await picker.pickImage(source: ImageSource.gallery);
-
-  if (picked != null) {
-    final bytes = await picked.readAsBytes();
-
-    // Call backend to update picture
-    final profileService = Profileservice();
-    final String? error = await profileService.changeProfilePicture(bytes);
-
-    if (error == null) {
-      setState(() {
-        _profilePic = bytes;
-      });
-      widget.onProfilePicChanged(bytes);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile picture updated successfully!")),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update profile picture: $error")),
-      );
-    }
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -149,9 +145,13 @@ Future<void> _pickImage() async {
                           backgroundImage: _profilePic != null
                               ? MemoryImage(_profilePic!)
                               : const AssetImage('assets/images/Profile.png')
-                                  as ImageProvider,
+                                    as ImageProvider,
                           child: _profilePic == null
-                              ? const Icon(Icons.camera_alt, size: 40, color: Colors.black54)
+                              ? const Icon(
+                                  Icons.camera_alt,
+                                  size: 40,
+                                  color: Colors.black54,
+                                )
                               : null,
                         ),
                       ),
@@ -181,10 +181,20 @@ Future<void> _pickImage() async {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Text(fullName,
-                    style: AppTextStyles.body1(color: AppColors.black, fontSize: 16)),
-                Text(email,
-                    style: AppTextStyles.body1(color: AppColors.primary, fontSize: 14)),
+                Text(
+                  widget.fullName,
+                  style: AppTextStyles.body1(
+                    color: AppColors.black,
+                    fontSize: 16,
+                  ),
+                ),
+                Text(
+                  widget.email,
+                  style: AppTextStyles.body1(
+                    color: AppColors.primary,
+                    fontSize: 14,
+                  ),
+                ),
                 const SizedBox(height: 25),
                 ProfileRow(
                   widget: CircleAvatar(
@@ -204,16 +214,27 @@ Future<void> _pickImage() async {
                 Divider(color: AppColors.lightLightGrey, thickness: 2),
                 const SizedBox(height: 15),
                 ProfileRow(
-                  widget: const Icon(Icons.person, color: AppColors.darkGrey, size: 30),
+                  widget: const Icon(
+                    Icons.person,
+                    color: AppColors.darkGrey,
+                    size: 30,
+                  ),
                   text: "Change full name",
                   onPressed: () async {
-                    await Navigator.pushNamed(context, AppRoutes.changeFullName);
+                    await Navigator.pushNamed(
+                      context,
+                      AppRoutes.changeFullName,
+                    );
                     _loadFullName();
                   },
                 ),
                 const SizedBox(height: 15),
                 ProfileRow(
-                  widget: const Icon(Icons.security, color: AppColors.darkGrey, size: 30),
+                  widget: const Icon(
+                    Icons.security,
+                    color: AppColors.darkGrey,
+                    size: 30,
+                  ),
                   text: "Change password",
                   onPressed: () {
                     Navigator.pushNamed(context, AppRoutes.changePassword);
@@ -221,7 +242,11 @@ Future<void> _pickImage() async {
                 ),
                 const SizedBox(height: 15),
                 ProfileRow(
-                  widget: const Icon(Icons.logout, color: AppColors.error, size: 30),
+                  widget: const Icon(
+                    Icons.logout,
+                    color: AppColors.error,
+                    size: 30,
+                  ),
                   text: "Log out",
                   textColor: AppColors.error,
                   onPressed: () {
@@ -231,17 +256,23 @@ Future<void> _pickImage() async {
                         return AlertDialog(
                           backgroundColor: Colors.white,
                           title: const Text("Log out"),
-                          content: const Text("Are you sure you want to leave the app?"),
+                          content: const Text(
+                            "Are you sure you want to leave the app?",
+                          ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
-                              child: const Text("Cancel",
-                                  style: TextStyle(color: AppColors.darkGrey)),
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(color: AppColors.darkGrey),
+                              ),
                             ),
                             TextButton(
                               onPressed: () => AuthService().logout(context),
-                              child: const Text("Log out",
-                                  style: TextStyle(color: AppColors.error)),
+                              child: const Text(
+                                "Log out",
+                                style: TextStyle(color: AppColors.error),
+                              ),
                             ),
                           ],
                         );
