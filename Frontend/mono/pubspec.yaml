@@ -17,18 +17,18 @@ dependencies:
   lottie: ^3.3.1
   http: ^1.5.0
   flutter_svg: ^2.2.0
-  intl: ^0.19.0
+  intl: ^0.20.2
   flutter_launcher_icons: ^0.14.4
   shimmer: ^3.0.0
   share_plus: ^11.1.0
-  fl_chart: ^1.0.0
+  fl_chart: ^0.69.0
   image_picker: ^1.2.0
 
 
 flutter_launcher_icons:   
   android: true
   
-  image_path: "assets/images/wallet_with_cash.png"
+  image_path: "assets/icons/appIcon.png"
 
 
 
@@ -38,7 +38,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
 
 flutter:

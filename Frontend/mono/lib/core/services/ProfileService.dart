@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Profileservice {
-  String baseUrl = "http://192.168.1.7:8081/api/profile";
+  String baseUrl = "https://mono-backend-5.onrender.com/api/profile";
 
   Future<String?> changeFullname(String fullName) async {
     try {
